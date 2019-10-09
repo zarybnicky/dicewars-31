@@ -4,10 +4,13 @@ import logging
 import os
 import random
 import socket
+import sys
 
 from game.board import Board
 from game.generator import BoardGenerator
 from game.player import Player
+
+from .summary import GameSummary
 
 
 class Game(object):
@@ -43,6 +46,8 @@ class Game(object):
         self.initialize_game()
         self.connect_clients()
 
+        self.summary = GameSummary()
+
 
     def run(self):
         """Main loop of the game
@@ -55,6 +60,7 @@ class Game(object):
                 self.logger.debug("Current player {}".format(self.current_player.get_name()))
                 self.handle_player_turn()
                 if self.check_win_condition():
+                    sys.stdout.write(str(self.summary))
                     break
 
         except KeyboardInterrupt:
@@ -271,6 +277,7 @@ class Game(object):
         for p in self.players:
             player = self.players[p]
             if player.get_number_of_areas() == self.board.get_number_of_areas():
+                self.summary.set_winner(player.get_name())
                 self.logger.info("Player {} wins!".format(player.get_name()))
                 for i in self.players:
                     self.send_message(self.players[i], 'game_end', winner=player.get_name())
