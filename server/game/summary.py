@@ -26,3 +26,12 @@ class GameSummary(object):
         summary = cls()
         summary.set_winner(winner)
         return summary
+
+
+def get_win_rates(summaries, nb_players):
+    nb_wins = {str(i): 0 for i in range(1, nb_players+1)}
+
+    for summary in summaries:
+        nb_wins[summary.winner] += 1
+
+    return nb_wins

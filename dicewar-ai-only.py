@@ -5,12 +5,13 @@ from signal import signal, SIGCHLD
 from subprocess import Popen
 from time import sleep
 from argparse import ArgumentParser
+
 from server.game.summary import GameSummary
+from server.game.summary import get_win_rates
 
 
 parser = ArgumentParser(prog='Dice_Wars')
-parser.add_argument('--nb-games', help="Number of games.", type=int, default=1)
-parser.add_argument('-n', '--number-of-players', help="Number of players.", type=int, default=2)
+parser.add_argument('-n', '--nb-games', help="Number of games.", type=int, default=1)
 parser.add_argument('-p', '--port', help="Server port", type=int, default=5005)
 parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1')
 parser.add_argument('--ai', help="Specify AI versions as a sequence of ints.",
@@ -32,7 +33,7 @@ def signal_handler(signum, frame):
 def run_single_game(args):
     server_cmd = [
         "./server/server.py",
-        "-n", str(args.number_of_players),
+        "-n", str(len(args.ai)),
         "-p", str(args.port),
         "-a", str(args.address),
     ]
@@ -64,24 +65,28 @@ def main():
     Run the Dice Wars game among AI's.
 
     Example:
-        ./dicewars.py -n 4 --ai 4 2 1
-        # runs a four-player game with AIs 4, 2, and 1
+        ./dicewars.py --nb-games 16 --ai 4 4 2 1
+        # runs 16 games four-player games with AIs 4 (two players), 2, and 1
     """
     args = parser.parse_args()
 
     signal(SIGCHLD, signal_handler)
 
-    if len(args.ai) != args.number_of_players:
-        print("Non-matching number of AIs")
+    if len(args.ai) < 2 or len(args.ai) > 8:
+        print("Unsupported number of AIs")
         exit(1)
 
+    summaries = []
     for i in range(args.nb_games):
         try:
             game_summary = run_single_game(args)
-            sys.stdout.write("{}".format(game_summary))
+            summaries.append(game_summary)
         except KeyboardInterrupt:
             for p in procs:
                 p.kill()
+
+    win_numbers = get_win_rates(summaries, len(args.ai))
+    sys.stdout.write("Win counts {}\n".format(win_numbers))
 
 
 if __name__ == '__main__':
