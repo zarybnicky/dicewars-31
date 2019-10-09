@@ -9,6 +9,7 @@ from server.game.summary import GameSummary
 
 
 parser = ArgumentParser(prog='Dice_Wars')
+parser.add_argument('--nb-games', help="Number of games.", type=int, default=1)
 parser.add_argument('-n', '--number-of-players', help="Number of players.", type=int, default=2)
 parser.add_argument('-p', '--port', help="Server port", type=int, default=5005)
 parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1')
@@ -28,6 +29,36 @@ def signal_handler(signum, frame):
             pass
 
 
+def run_single_game(args):
+    server_cmd = [
+        "./server/server.py",
+        "-n", str(args.number_of_players),
+        "-p", str(args.port),
+        "-a", str(args.address),
+    ]
+
+    server_output = tempfile.TemporaryFile('w+')
+    procs.append(Popen(server_cmd, stdout=server_output))
+
+    for ai_version in args.ai:
+        client_cmd = [
+            "./client/client.py",
+            "-p", str(args.port),
+            "-a", str(args.address),
+            "--ai", str(ai_version),
+        ]
+
+        procs.append(Popen(client_cmd))
+        sleep(0.1)
+
+    for p in procs:
+        p.wait()
+
+    server_output.seek(0)
+    game_summary = GameSummary.from_repr(server_output.read())
+    return game_summary
+
+
 def main():
     """
     Run the Dice Wars game among AI's.
@@ -44,38 +75,13 @@ def main():
         print("Non-matching number of AIs")
         exit(1)
 
-    try:
-        server_cmd = [
-            "./server/server.py",
-            "-n", str(args.number_of_players),
-            "-p", str(args.port),
-            "-a", str(args.address),
-        ]
-
-        server_output = tempfile.TemporaryFile('w+')
-        procs.append(Popen(server_cmd, stdout=server_output))
-
-        for ai_version in args.ai:
-            client_cmd = [
-                "./client/client.py",
-                "-p", str(args.port),
-                "-a", str(args.address),
-                "--ai", str(ai_version),
-            ]
-
-            procs.append(Popen(client_cmd))
-            sleep(0.1)
-
-        for p in procs:
-            p.wait()
-
-        server_output.seek(0)
-        game_summary = GameSummary.from_repr(server_output.read())
-        sys.stdout.write("{}".format(game_summary))
-
-    except KeyboardInterrupt:
-        for p in procs:
-            p.kill()
+    for i in range(args.nb_games):
+        try:
+            game_summary = run_single_game(args)
+            sys.stdout.write("{}".format(game_summary))
+        except KeyboardInterrupt:
+            for p in procs:
+                p.kill()
 
 
 if __name__ == '__main__':
