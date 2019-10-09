@@ -6,9 +6,9 @@ import random
 import socket
 import sys
 
-from game.board import Board
-from game.generator import BoardGenerator
-from game.player import Player
+from .board import Board
+from .generator import BoardGenerator
+from .player import Player
 
 from .summary import GameSummary
 

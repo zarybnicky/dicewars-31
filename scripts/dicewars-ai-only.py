@@ -6,8 +6,8 @@ from subprocess import Popen
 from time import sleep
 from argparse import ArgumentParser
 
-from server.game.summary import GameSummary
-from server.game.summary import get_win_rates
+from dicewars.server.game.summary import GameSummary
+from dicewars.server.game.summary import get_win_rates
 
 
 parser = ArgumentParser(prog='Dice_Wars')
@@ -32,7 +32,7 @@ def signal_handler(signum, frame):
 
 def run_single_game(args):
     server_cmd = [
-        "./server/server.py",
+        "./scripts/server.py",
         "-n", str(len(args.ai)),
         "-p", str(args.port),
         "-a", str(args.address),
@@ -43,7 +43,7 @@ def run_single_game(args):
 
     for ai_version in args.ai:
         client_cmd = [
-            "./client/client.py",
+            "./scripts/client.py",
             "-p", str(args.port),
             "-a", str(args.address),
             "--ai", str(ai_version),

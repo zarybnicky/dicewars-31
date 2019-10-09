@@ -4,9 +4,9 @@ from importlib import import_module
 from PyQt5.QtWidgets import QApplication
 import sys
 
-from args import parse
-from game import Game
-from ui import ClientUI
+from dicewars.client.args import parse
+from dicewars.client.game import Game
+from dicewars.client.ui import ClientUI
 
 
 def main():
@@ -20,19 +20,19 @@ def main():
 
     if args.ai:
         if args.ai == 1:
-            from ai.ai1 import AI
+            from dicewars.client.ai.ai1 import AI
         elif args.ai == 2:
-            from ai.ai2 import AI
+            from dicewars.client.ai.ai2 import AI
         elif args.ai == 3:
-            from ai.ai3 import AI
+            from dicewars.client.ai.ai3 import AI
         elif args.ai == 4:
-            from ai.ai4 import AI
+            from dicewars.client.ai.ai4 import AI
         elif args.ai == 5:
-            from ai.ai5 import AI
+            from dicewars.client.ai.ai5 import AI
         elif args.ai == 6:
-            from ai.ai6 import AI
+            from dicewars.client.ai.ai6 import AI
         elif args.ai == 7:
-            from ai.ai7 import AI
+            from dicewars.client.ai.ai7 import AI
         else:
             logging.error("No AI version {0}.".format(args.ai))
             exit(1)

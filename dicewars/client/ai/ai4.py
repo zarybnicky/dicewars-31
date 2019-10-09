@@ -1,8 +1,8 @@
 from random import shuffle
 from pprint import pprint
 
-from ai import GenericAI
-from ai.utils import attack_succcess_probability, probability_of_holding_area, probability_of_successful_attack
+from ..ai import GenericAI
+from .utils import attack_succcess_probability, probability_of_holding_area, probability_of_successful_attack
 
 
 class AI(GenericAI):

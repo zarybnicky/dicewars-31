@@ -48,7 +48,7 @@ def main():
 
     try:
         cmd = [
-            "./server/server.py",
+            "./scripts/server.py",
             "-n", str(args.number_of_players),
             "-p", str(args.port),
             "-a", str(args.address),
@@ -59,13 +59,13 @@ def main():
         for i in range(1, args.number_of_players + 1):
             if i == 1:
                 cmd = [
-                    "./client/client.py",
+                    "./scripts/client.py",
                     "-p", str(args.port),
                     "-a", str(args.address),
                 ]
             else:
                 cmd = [
-                    "./client/client.py",
+                    "./scripts/client.py",
                     "-p", str(args.port),
                     "-a", str(args.address),
                     "--ai", str(ai_versions[i - 2]),

@@ -5,9 +5,9 @@ import socket
 from queue import Queue
 from time import sleep
 
-from game.board import Board
-from game.player import Player
-from socket_listener import SocketListener
+from .board import Board
+from .player import Player
+from dicewars.client.socket_listener import SocketListener
 
 
 class Game(object):

@@ -2,17 +2,17 @@ import numpy
 
 from random import shuffle
 
-from ai import GenericAI
-from ai.utils import attack_succcess_probability , probability_of_successful_attack, sigmoid
+from ..ai import GenericAI
+from .utils import attack_succcess_probability , probability_of_successful_attack, sigmoid
 
 
 class AI(GenericAI):
-    """Agent using Win Probability Maximization (WPM) using player scores
+    """Agent using Win Probability Maximization (WPM) using logarithms of player dice
 
     This agent estimates win probability given the current state of the game.
-    As a feature to describe the state, a vector of players' scores is used.
-    The agent choses such moves, that will have the highest improvement in
-    the estimated probability.
+    As a feature to describe the state, a vector of logarithms of players' scores
+    is used. The agent choses such moves, that will have the highest improvement
+    in the estimated probability.
     """
     def __init__(self, game):
         """
@@ -31,7 +31,6 @@ class AI(GenericAI):
         """
         super(AI, self).__init__(game)
         self.players = len(self.game.players)
-
         self.largest_region  = []
 
         self.players_order = game.players_order
@@ -39,14 +38,15 @@ class AI(GenericAI):
             self.players_order.append(self.players_order.pop(0))
 
         self.weights = {
-            2: numpy.array([0.51862355, -0.417179]),
-            3: numpy.array([0.24112347, -0.20702862, -0.20097175]),
-            4: numpy.array([0.26457488, -0.20733951, -0.19326027, -0.20171941]),
-            5: numpy.array([0.26777938, -0.1878346, -0.18560973, -0.20005864, -0.18976791]),
-            6: numpy.array([0.2700982, -0.18000744, -0.18290534, -0.1815374, -0.20105069, -0.1808327]),
-            7: numpy.array([0.27109102, -0.18051686, -0.18232428, -0.17905882, -0.17959111, -0.17958394, -0.17634735]),
-            8: numpy.array([0.277179, -0.16852433, -0.18678373, -0.17492631, -0.17996621, -0.1790844, -0.16977776, -0.18876063]),
+            2: numpy.array([3.06600354, -3.06600354]),
+            3: numpy.array([1.16329046, -0.81105584, -0.80085993]),
+            4: numpy.array([0.91252927, -0.55857427, -0.51781521, -0.57183507]),
+            5: numpy.array([0.80138262, -0.43013021, -0.4388323, -0.48048114, -0.45301658]),
+            6: numpy.array([0.74465716, -0.40179109, -0.39851363, -0.39515928, -0.43863283, -0.38371555]),
+            7: numpy.array([0.72382109, -0.39171476, -0.39423241, -0.38390144, -0.38401564, -0.36980703, -0.36138501]),
+            8: numpy.array([0.72340846, -0.35936507, -0.38758583, -0.35487285, -0.37616735, -0.37974499, -0.34989554, -0.37451491]),
         }[self.players]
+        numpy.warnings.filterwarnings('ignore')
 
     def ai_turn(self):
         """AI agent's turn
@@ -57,8 +57,7 @@ class AI(GenericAI):
         """
         self.logger.debug("Looking for possible turns.")
         turns = self.possible_turns()
-
-        if turns:
+        if turns and turns[0][0] != 'end':
             turn = turns[0]
             area_name = turn[0]
             self.logger.debug("Possible turn: {}".format(turn))
@@ -70,7 +69,17 @@ class AI(GenericAI):
                 self.waitingForResponse = True
                 return True
 
-        self.logger.debug("No more plays.")
+        if turns and turns[0][0] == 'end':
+            for i in range(1, len(turns)):
+                area_name = turns[i][0]
+                atk_area = self.board.get_area(area_name)
+                atk_power = atk_area.get_dice()
+                if atk_power == 8:
+                    self.send_message('battle', attacker=area_name, defender=turns[i][1])
+                    self.waitingForResponse = True
+                    return True
+
+        self.logger.debug("Don't want to attack anymore.")
         self.send_message('end_turn')
         self.waitingForResponse = True
 
@@ -78,20 +87,33 @@ class AI(GenericAI):
 
     def possible_turns(self):
         """Get list of possible turns with the associated improvement
-        in estimated win probability
+        in estimated win probability. The list is sorted in descending order
+        with respect to the improvement.
         """
         turns = []
+        name = self.player_name
 
         features = []
         for p in self.players_order:
-            features.append(self.get_score_by_player(p))
-        win_prob = numpy.log(sigmoid(numpy.dot(numpy.array(features), self.weights)))
+            dice = numpy.log(self.game.board.get_player_dice(p))
+            if numpy.isinf(dice):
+                dice = 0
+            features.append(dice)
 
-        self.get_largest_region()
+        wp_start = numpy.log(sigmoid(numpy.dot(numpy.array(features), self.weights)))
+
+        end_features = [d for d in features]
+        end_features[0] = numpy.log(self.game.board.get_player_dice(name) + self.get_score_by_player(name))
+        if numpy.isinf(end_features[0]):
+            end_features[0] = 0
+        wp_end = numpy.log(sigmoid(numpy.dot(numpy.array(end_features), self.weights)))
+        improvement = wp_end - wp_start
+
+        turns.append(['end', 0, improvement])
 
         for area in self.board.areas.values():
             # area belongs to the player and has strength to attack
-            if area.get_owner_name() == self.player_name and area.get_dice() > 1:
+            if area.get_owner_name() == name and area.get_dice() > 1:
                 area_name = area.get_name()
                 atk_power = area.get_dice()
 
@@ -100,7 +122,8 @@ class AI(GenericAI):
 
                     # adjacent area belongs to an opponent
                     opponent_name = adjacent_area.get_owner_name()
-                    if opponent_name != self.player_name:
+                    if opponent_name != name:
+                        def_power = adjacent_area.get_dice()
                         # check whether the attack would expand the largest region
                         increase_score = False
                         if area_name in self.largest_region:
@@ -111,22 +134,52 @@ class AI(GenericAI):
                                     increase_score = True
                                     break
 
-                        if increase_score or atk_power is 8:
-                            atk_prob = numpy.log(probability_of_successful_attack(self.board, area_name, adj))
-                            new_features = []
-                            for p in self.players_order:
-                                idx = self.players_order.index(p)
-                                if p == self.player_name:
-                                    new_features.append(features[idx] + 1 if increase_score else features[idx])
-                                elif p == opponent_name:
-                                    new_features.append(self.get_score_by_player(p, skip_area=adj))
-                                else:
-                                    new_features.append(features[idx])
-                            new_win_prob = numpy.log(sigmoid(numpy.dot(numpy.array(new_features), self.weights)))
-                            total_prob = new_win_prob + atk_prob
-                            improvement = total_prob - win_prob
-                            if improvement >= -1:
-                                turns.append([area_name, adj, improvement])
+                        a_dice = self.game.board.get_player_dice(name)
+                        a_score = self.get_score_by_player(name)
+                        if increase_score:
+                            a_score += 1
+
+                        atk_dice = {
+                            "current": a_dice,
+                            "win": a_dice + a_score,
+                            "loss": a_dice + a_score - atk_power + 1,
+                        }
+
+                        d_dice = self.game.board.get_player_dice(opponent_name)
+                        d_score = self.get_score_by_player(opponent_name)
+                        def_dice = {
+                            "loss": d_dice,
+                            "win": d_dice - def_power,
+                        }
+
+                        atk_prob = probability_of_successful_attack(self.board, area_name, adj)
+                        opponent_idx = self.players_order.index(opponent_name)
+                        win_features = [d for d in features]
+                        win_features[0] = numpy.log(atk_dice["win"])
+                        if numpy.isinf(win_features[0]):
+                            win_features[0] = 0
+                        win_features[opponent_idx] = numpy.log(def_dice["win"])
+                        if numpy.isinf(win_features[opponent_idx]):
+                            win_features[opponent_idx] = 0
+
+                        loss_features = [d for d in features]
+                        loss_features[0] = numpy.log(atk_dice["loss"])
+                        if numpy.isinf(loss_features[0]):
+                            loss_features[0] = 0
+                        loss_features[opponent_idx] = numpy.log(def_dice["loss"])
+                        if numpy.isinf(loss_features[opponent_idx]):
+                            loss_features[opponent_idx] = 0
+
+                        wp_win = sigmoid(numpy.dot(numpy.array(win_features), self.weights))
+                        wp_loss = sigmoid(numpy.dot(numpy.array(loss_features), self.weights))
+
+                        wp_win = sigmoid(numpy.dot(numpy.array(win_features), self.weights))
+                        wp_loss = sigmoid(numpy.dot(numpy.array(loss_features), self.weights))
+                        total_prob = (wp_win * atk_prob) + (wp_loss * (1.0 - atk_prob))
+                        wp_atk = numpy.log(total_prob)
+
+                        improvement = wp_atk - wp_start
+                        turns.append([area_name, adj, improvement])
 
         return sorted(turns, key=lambda turn: turn[2], reverse=True)
 

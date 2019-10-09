@@ -1,6 +1,6 @@
 import logging
 
-from game.area import Area
+from .area import Area
 
 
 class Board(object):

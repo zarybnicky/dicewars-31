@@ -1,6 +1,6 @@
 from random import shuffle
 
-from ai import GenericAI
+from ..ai import GenericAI
 
 
 class AI(GenericAI):
