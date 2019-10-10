@@ -88,6 +88,9 @@ def main():
             for p in procs:
                 p.kill()
             break
+        except AttributeError:
+            for p in procs:
+                p.kill()
     if args.report:
         sys.stdout.write('\r')
 
