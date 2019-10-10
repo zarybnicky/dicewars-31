@@ -453,17 +453,6 @@ class Game(object):
     ##################
     # INITIALIZATION #
     ##################
-    def initialize_game(self):
-        """Initialization of the game
-
-        Attributes
-        ----------
-        board : Board
-        players : list of Player
-        players_order : list of int
-        """
-
-
     def initialize_players(self):
         self.players = {}
         for i in range(1, self.number_of_players + 1):
