@@ -457,8 +457,6 @@ class Game(object):
         players : list of Player
         players_order : list of int
         """
-        generator = BoardGenerator()
-        self.board = Board(generator.generate_board())
 
         self.players = {}
         for i in range(1, self.number_of_players + 1):

@@ -2,6 +2,7 @@
 
 from argparse import ArgumentParser
 import logging
+import random
 
 from dicewars.server.game.generator import BoardGenerator
 from dicewars.server.game.board import Board
@@ -34,6 +35,7 @@ def main():
     parser.add_argument('-p', '--port', help="Server port", type=int, default=5005)
     parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1')
     parser.add_argument('-d', '--debug', help="Enable debug output", default='WARN')
+    parser.add_argument('-b', '--board', help="Random seed to be used for board creating", type=int)
     args = parser.parse_args()
     log_level = get_logging_level(args)
 
@@ -41,6 +43,7 @@ def main():
     logger = logging.getLogger('SERVER')
     logger.debug("Command line arguments: {0}".format(args))
 
+    random.seed(args.board)
     generator = BoardGenerator()
     board = Board(generator.generate_board())
 
