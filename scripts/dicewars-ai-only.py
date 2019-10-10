@@ -16,6 +16,7 @@ parser.add_argument('-p', '--port', help="Server port", type=int, default=5005)
 parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1')
 parser.add_argument('--ai', help="Specify AI versions as a sequence of ints.",
                     type=int, nargs='+')
+parser.add_argument('-r', '--report', help="State the game number on the stdout", action='store_true')
 
 procs = []
 
@@ -78,12 +79,16 @@ def main():
 
     summaries = []
     for i in range(args.nb_games):
+        if args.report:
+            sys.stdout.write('\r{}'.format(i))
         try:
             game_summary = run_single_game(args)
             summaries.append(game_summary)
         except KeyboardInterrupt:
             for p in procs:
                 p.kill()
+    if args.report:
+        sys.stdout.write('\r')
 
     win_numbers = get_win_rates(summaries, len(args.ai))
     sys.stdout.write("Win counts {}\n".format(win_numbers))
