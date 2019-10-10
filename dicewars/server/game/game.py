@@ -43,8 +43,13 @@ class Game(object):
         self.number_of_players = players
 
         self.create_socket()
+
         self.board = board
-        self.initialize_game()
+        self.initialize_players()
+        self.assign_areas_to_players()
+        self.assign_dice_to_players()
+        self.logger.debug("Board initialized")
+
         self.connect_clients()
 
         self.summary = GameSummary()
@@ -458,10 +463,6 @@ class Game(object):
         players_order : list of int
         """
 
-        self.initialize_players()
-        self.assign_areas_to_players()
-        self.assign_dice_to_players()
-        self.logger.debug("Board initialized")
 
     def initialize_players(self):
         self.players = {}
