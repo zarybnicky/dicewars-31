@@ -5,7 +5,7 @@ class Area(object):
     """Object representing a single area.
     """
     def __init__(self, name, adjacent_areas):
-        """ 
+        """
         Parameters
         ----------
         name : int
@@ -93,14 +93,14 @@ class Area(object):
 
         Returns
         -------
-        int 
+        int
             Identifier of the area
         """
         return self.name
 
     def get_owner_name(self):
         """Get owner's name
-        
+
         Returns
         -------
         int or bool
@@ -113,15 +113,14 @@ class Area(object):
 
     def set_dice(self, dice):
         """Set area's dice to a certain value
-        
+
         Parameters
         ----------
         dice : int
             Number of dice
         """
         if dice < 1 or dice > 8:
-            self.logger.warning("Trying to assign {0} dice to area {1}"\
-                                .format(dice, self.name))
+            self.logger.warning("Trying to assign {0} dice to area {1}".format(dice, self.name))
         else:
             self.dice = dice
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import sys
 from signal import signal, SIGCHLD
 from subprocess import Popen
 from time import sleep
@@ -34,7 +33,7 @@ def main():
     Run the Dice Wars game.
 
     Example:
-        ./dicewars.py -n 4 --ai 4 2 1 
+        ./dicewars.py -n 4 --ai 4 2 1
         # runs a four-player game with AIs 4, 2, and 1
     """
     args = parser.parse_args()

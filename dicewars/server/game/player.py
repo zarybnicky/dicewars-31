@@ -39,14 +39,13 @@ class Player(object):
         """Add area to player's areas
         """
         if area in self.areas:
-            self.logger.warning("Area {0} already belonging to player {1}."\
-                                .format(area.get_name(), self.name))
+            self.logger.warning("Area {0} already belonging to player {1}.".format(area.get_name(), self.name))
         else:
             self.areas.append(area)
 
     def assign_client(self, socket, client_addr):
         """Assign client's socket, IP address, and port number
-        
+
         Parameters
         ----------
         socket : socket
@@ -68,9 +67,6 @@ class Player(object):
         list of Area
         """
         return self.areas
-
-    #def get_areas_names(self):
-    #    return ','.join(str(a.get_name()) for a in self.areas)
 
     def get_largest_region(self, board):
         """Get player's score
@@ -136,8 +132,10 @@ class Player(object):
         return self.dice_reserve
 
     def has_client(self):
-        if self.socket: return True
-        else: return False
+        if self.socket:
+            return True
+        else:
+            return False
 
     def remove_area(self, area):
         """Remove area from list of areas controlled by the player
@@ -168,7 +166,7 @@ class Player(object):
         """Return number of areas under Player's control
         """
         return len(self.areas)
-        
+
     def total_dice(self):
         """Return total number of Player's dice
         """
@@ -176,4 +174,3 @@ class Player(object):
         for area in self.areas:
             td += area.get_dice()
         return td
-

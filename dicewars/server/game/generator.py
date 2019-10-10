@@ -46,7 +46,7 @@ class BoardGenerator(object):
         Returns
         -------
         dict
-            Dictionary of areas in the game board. Contains names of adjacent 
+            Dictionary of areas in the game board. Contains names of adjacent
             areas and coordinates of the hexes of each area
         """
         self.a = {}

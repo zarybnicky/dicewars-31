@@ -42,7 +42,7 @@ class Board(object):
 
     def get_board(self):
         """Get dictionary listing adjacent areas for each area
-        
+
         Returns
         -------
         dictionary of int: list of int

@@ -1,13 +1,10 @@
 import json
 from json.decoder import JSONDecodeError
 import logging
-import os
 import random
 import socket
 import sys
 
-from .board import Board
-from .generator import BoardGenerator
 from .player import Player
 
 from .summary import GameSummary
@@ -52,7 +49,6 @@ class Game(object):
         self.connect_clients()
 
         self.summary = GameSummary()
-
 
     def run(self):
         """Main loop of the game
@@ -107,8 +103,6 @@ class Game(object):
         msg = self.get_message(player)
 
         if msg['type'] == 'battle':
-            atk_dice = self.board.get_area_by_name(msg['atk']).get_dice()
-            def_name = self.board.get_area_by_name(msg['def']).get_owner_name()
             battle = self.battle(self.board.get_area_by_name(msg['atk']), self.board.get_area_by_name(msg['def']))
             self.logger.debug("Battle result: {}".format(battle))
             for p in self.players:
@@ -125,7 +119,7 @@ class Game(object):
         Returns
         -------
         dict
-            Dictionary containing owner, dice and adjacent areas of 
+            Dictionary containing owner, dice and adjacent areas of
             each area, as well as score of each player
         """
         game_state = {
@@ -155,7 +149,7 @@ class Game(object):
         -------
         dict
             Dictionary with the result of the battle including information
-            about rolled numbers, dice left after the battle, and possible 
+            about rolled numbers, dice left after the battle, and possible
             new ownership of the areas
         """
         atk_dice = attacker.get_dice()
@@ -166,9 +160,9 @@ class Game(object):
         def_name = defender.get_owner_name()
 
         for i in range(0, atk_dice):
-            atk_pwr += random.randint(1,6)
+            atk_pwr += random.randint(1, 6)
         for i in range(0, def_dice):
-            def_pwr += random.randint(1,6)
+            def_pwr += random.randint(1, 6)
 
         battle = {
             'atk': {
@@ -206,7 +200,7 @@ class Game(object):
 
     def end_turn(self):
         """Handles end turn command
-        
+
         Returns
         -------
         dict
@@ -344,12 +338,12 @@ class Game(object):
             msg['no_players'] = self.number_of_players
             msg['current_player'] = self.current_player.get_name()
 
-        elif type is 'battle':
+        elif type == 'battle':
             msg = self.get_state()
             msg['type'] = 'battle'
             msg['result'] = battle
 
-        elif type is 'end_turn':
+        elif type == 'end_turn':
             msg = self.get_state()
             msg['type'] = 'end_turn'
             msg['areas'] = areas
@@ -358,7 +352,7 @@ class Game(object):
                 i: self.players[i].get_reserve() for i in self.players
             }
 
-        elif type is 'game_end':
+        elif type == 'game_end':
             msg = {
                 'type': 'game_end',
                 'winner': winner
@@ -412,7 +406,7 @@ class Game(object):
             Client's address and port number
         i : int
             Player's name
-        
+
         Returns
         -------
         Player
