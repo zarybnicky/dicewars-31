@@ -458,6 +458,12 @@ class Game(object):
         players_order : list of int
         """
 
+        self.initialize_players()
+        self.assign_areas_to_players()
+        self.assign_dice_to_players()
+        self.logger.debug("Board initialized")
+
+    def initialize_players(self):
         self.players = {}
         for i in range(1, self.number_of_players + 1):
             self.players[i] = Player(i)
@@ -467,10 +473,6 @@ class Game(object):
 
         self.set_first_player()
         self.logger.debug("Player order {0}".format(self.players_order))
-
-        self.assign_areas_to_players()
-        self.assign_dice_to_players()
-        self.logger.debug("Board initialized")
 
     def assign_areas_to_players(self):
         """Assigns areas to players at the start of the game
