@@ -16,7 +16,7 @@ from .summary import GameSummary
 class Game(object):
     """Instance of the game
     """
-    def __init__(self, players, addr, port):
+    def __init__(self, board, players, addr, port):
         """Initialize game and connect clients
 
         Parameters
@@ -43,6 +43,7 @@ class Game(object):
         self.number_of_players = players
 
         self.create_socket()
+        self.board = board
         self.initialize_game()
         self.connect_clients()
 

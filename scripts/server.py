@@ -3,6 +3,8 @@
 from argparse import ArgumentParser
 import logging
 
+from dicewars.server.game.generator import BoardGenerator
+from dicewars.server.game.board import Board
 from dicewars.server.game import Game
 
 
@@ -39,7 +41,10 @@ def main():
     logger = logging.getLogger('SERVER')
     logger.debug("Command line arguments: {0}".format(args))
 
-    game = Game(args.number_of_players, args.address, args.port)
+    generator = BoardGenerator()
+    board = Board(generator.generate_board())
+
+    game = Game(board, args.number_of_players, args.address, args.port)
     game.run()
 
 
