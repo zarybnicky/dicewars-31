@@ -4,8 +4,7 @@ from argparse import ArgumentParser
 import logging
 import random
 
-from dicewars.server.game.generator import BoardGenerator
-from dicewars.server.game.board import Board
+from dicewars.server.game import Board, BoardGenerator
 from dicewars.server.game import Game
 
 
