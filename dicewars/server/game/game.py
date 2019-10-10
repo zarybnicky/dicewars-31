@@ -16,7 +16,7 @@ from .summary import GameSummary
 class Game(object):
     """Instance of the game
     """
-    def __init__(self, board, players, addr, port):
+    def __init__(self, board, area_ownership, players, addr, port):
         """Initialize game and connect clients
 
         Parameters
@@ -46,7 +46,7 @@ class Game(object):
 
         self.board = board
         self.initialize_players()
-        self.assign_areas_to_players()
+        self.assign_areas_to_players(area_ownership)
         self.assign_dice_to_players()
         self.logger.debug("Board initialized")
 
@@ -475,22 +475,15 @@ class Game(object):
         self.set_first_player()
         self.logger.debug("Player order {0}".format(self.players_order))
 
-    def assign_areas_to_players(self):
+    def assign_areas_to_players(self, ownership):
         """Assigns areas to players at the start of the game
         """
-        no_areas = len(self.board.areas)
-        no_players = len(self.players)
-        areas = list(range(1, no_areas + 1))
 
-        while True:
-            for player in reversed(self.players_order):
-                area_name = random.choice(areas)
-                area = self.board.get_area_by_name(area_name)
-                self.assign_area(area, self.players[player])
-                areas.remove(area_name)
+        assert(len(ownership) == self.board.get_number_of_areas())
 
-                if not areas:
-                    return
+        for area_name, player_name in ownership.items():
+            area = self.board.get_area_by_name(area_name)
+            self.assign_area(area, self.players[player_name])
 
     def assign_dice_to_players(self):
         """Assigns dice to players at the start of the game
