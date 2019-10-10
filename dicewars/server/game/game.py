@@ -47,7 +47,6 @@ class Game(object):
         self.board = board
         self.initialize_players()
         self.assign_areas_to_players(area_ownership)
-        self.assign_dice_to_players()
         self.logger.debug("Board initialized")
 
         self.connect_clients()
@@ -473,32 +472,3 @@ class Game(object):
         for area_name, player_name in ownership.items():
             area = self.board.get_area_by_name(area_name)
             self.assign_area(area, self.players[player_name])
-
-    def assign_dice_to_players(self):
-        """Assigns dice to players at the start of the game
-        """
-        dice_total = 3 * self.board.get_number_of_areas() - random.randint(0, 5)
-        players = len(self.players)
-        players_processed = 0
-
-        for player in reversed(self.players_order):
-            dice = int(round(dice_total/ (players - players_processed)))
-            dice_total -= dice
-
-            areas = []
-            for area in self.players[player].get_areas():
-                areas.append(area)
-
-            # each area has to have at least one die
-            for area in areas:
-                area.set_dice(1)
-                dice -= 1
-
-            while dice and areas:
-                area = random.choice(areas)
-                if not area.add_die(): # adding a die to area failed means that area is full
-                    areas.remove(area)
-                else:
-                    dice -= 1
-
-            players_processed += 1

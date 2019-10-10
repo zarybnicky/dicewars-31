@@ -9,6 +9,7 @@ from argparse import ArgumentParser
 parser = ArgumentParser(prog='Dice_Wars')
 parser.add_argument('-n', '--number-of-players', help="Number of players.", type=int, default=2)
 parser.add_argument('-b', '--board', help="Seed for generating board", type=int)
+parser.add_argument('-s', '--strength', help="Seed for dice assignment", type=int)
 parser.add_argument('-o', '--ownership', help="Seed for province assignment", type=int)
 parser.add_argument('-p', '--port', help="Server port", type=int, default=5005)
 parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1')
@@ -59,6 +60,8 @@ def main():
             cmd.extend(['-b', str(args.board)])
         if args.ownership is not None:
             cmd.extend(['-o', str(args.ownership)])
+        if args.strength is not None:
+            cmd.extend(['-s', str(args.strength)])
 
         procs.append(Popen(cmd))
 

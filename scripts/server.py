@@ -40,6 +40,35 @@ def area_player_mapping(nb_players, nb_areas):
     return assignment
 
 
+def players_areas(ownership, the_player):
+    return [area for area, player in ownership.items() if player == the_player]
+
+
+def assign_dice(board, nb_players, ownership):
+    dice_total = 3 * board.get_number_of_areas() - random.randint(0, 5)
+    players_processed = 0
+
+    for player in range(1, nb_players+1):
+        player_dice = int(round(dice_total / (nb_players - players_processed)))
+        dice_total -= player_dice
+
+        available_areas = [board.get_area_by_name(area_name) for area_name in players_areas(ownership, player)]
+
+        # each area has to have at least one die
+        for area in available_areas:
+            area.set_dice(1)
+            player_dice -= 1
+
+        while player_dice and available_areas:
+            area = random.choice(available_areas)
+            if not area.add_die():  # adding a die to area failed means that area is full
+                available_areas.remove(area)
+            else:
+                player_dice -= 1
+
+        players_processed += 1
+
+
 def main():
     """
     Server for Dice Wars
@@ -52,6 +81,7 @@ def main():
     parser.add_argument('-d', '--debug', help="Enable debug output", default='WARN')
     parser.add_argument('-b', '--board', help="Random seed to be used for board creating", type=int)
     parser.add_argument('-o', '--ownership', help="Random seed to be used for province assignment", type=int)
+    parser.add_argument('-s', '--strength', help="Random seed to be used for dice assignment", type=int)
     args = parser.parse_args()
     log_level = get_logging_level(args)
 
@@ -66,6 +96,10 @@ def main():
     random.seed(args.ownership)
     area_ownership = area_player_mapping(args.number_of_players, board.get_number_of_areas())
 
+    random.seed(args.strength)
+    assign_dice(board, args.number_of_players, area_ownership)
+
+    random.seed(5)
     game = Game(board, area_ownership, args.number_of_players, args.address, args.port)
     game.run()
 
