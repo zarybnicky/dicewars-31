@@ -87,6 +87,7 @@ def main():
         except KeyboardInterrupt:
             for p in procs:
                 p.kill()
+            break
     if args.report:
         sys.stdout.write('\r')
 
