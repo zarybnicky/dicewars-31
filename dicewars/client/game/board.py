@@ -38,7 +38,7 @@ class Board(object):
         area_names_to_test = [area.get_name() for area in self.get_player_areas(player_name)]
 
         if not area_names_to_test:
-            return 0
+            return [[]]
 
         regions = []
         while area_names_to_test:
