@@ -262,10 +262,16 @@ class AI(GenericAI):
         if not area_names_to_test:
             return 0
 
+        players_regions = []
         while area_names_to_test:
             area_names_in_current_region = get_areas_region(self.board, area_names_to_test[0], area_names_to_test)
+            players_regions.append(area_names_in_current_region)
 
-            region_size = len(area_names_in_current_region)
+            for area in area_names_in_current_region:
+                area_names_to_test.remove(area)
+
+        for region in players_regions:
+            region_size = len(region)
             if region_size >= largest_region_size:
                 region = []
                 for area in area_names_in_current_region:
@@ -274,10 +280,6 @@ class AI(GenericAI):
                     largest_regions = []
                 largest_regions.append(region)
                 largest_region_size = region_size
-
-            for area in area_names_in_current_region:
-                if area in area_names_to_test:
-                    area_names_to_test.remove(area)
 
         for region in largest_regions:
             for area in region:
