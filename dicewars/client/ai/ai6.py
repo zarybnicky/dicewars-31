@@ -258,43 +258,43 @@ class AI(GenericAI):
         largest_regions = []  # names of areas in largest regions
         player_areas = []
 
-        areas_to_test = [area.get_name() for area in board.get_player_areas(self.player_name)]
+        area_names_to_test = [area.get_name() for area in board.get_player_areas(self.player_name)]
 
-        if not areas_to_test:
+        if not area_names_to_test:
             return 0
 
-        areas_in_current_region = [areas_to_test[0]]
+        while area_names_to_test:
+            areas_in_current_region = [area_names_to_test[0]]
 
-        while areas_to_test:
-            areas_already_tested = []
+            area_names_already_tested = []
             while areas_in_current_region:
                 current_area = areas_in_current_region[0]
                 areas_in_current_region.remove(current_area)
-                areas_already_tested.append(current_area)
+                area_names_already_tested.append(current_area)
 
-                for area in board.get_area(current_area).get_adjacent_areas():
-                    if (area not in areas_already_tested and
-                        area not in areas_in_current_region):
-                        if board.get_area(area).get_owner_name() == self.player_name:
-                            areas_in_current_region.append(area)
+                for neighbour_name in board.get_area(current_area).get_adjacent_areas():
+                    if neighbour_name in area_names_already_tested:
+                        continue
+                    if neighbour_name in areas_in_current_region:
+                        continue
 
-            region_size = len(areas_already_tested)
+                    if board.get_area(neighbour_name).get_owner_name() == self.player_name:
+                        areas_in_current_region.append(neighbour_name)
+
+            region_size = len(area_names_already_tested)
             if region_size >= largest_region_size:
                 region = []
-                for area in areas_already_tested:
+                for area in area_names_already_tested:
                     region.append(area)
                 if region_size > largest_region_size:
                     largest_regions = []
                 largest_regions.append(region)
                 largest_region_size = region_size
 
-            for area in areas_already_tested:
-                if area in areas_to_test:
-                    areas_to_test.remove(area)
+            for area in area_names_already_tested:
+                if area in area_names_to_test:
+                    area_names_to_test.remove(area)
                     player_areas.append(area)
-
-            if areas_to_test:
-                areas_in_current_region = [areas_to_test[0]]
 
         for region in largest_regions:
             for area in region:
