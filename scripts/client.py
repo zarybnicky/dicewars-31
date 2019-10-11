@@ -4,6 +4,7 @@ import logging
 from PyQt5.QtWidgets import QApplication
 import sys
 import random
+import json
 
 import importlib
 
@@ -17,6 +18,15 @@ def get_ai_constructor(ai_specification):
     ai_module = importlib.import_module('dicewars.client.ai.ai{}'.format(ai_specification))
 
     return ai_module.AI
+
+
+def get_nickname(args):
+    if args.ai:
+        nick = '{} (AI)'.format(args.ai)
+    else:
+        nick = 'Human'
+
+    return nick
 
 
 def main():
@@ -38,6 +48,15 @@ def main():
     logger = logging.getLogger('CLIENT')
 
     game = Game(args.address, args.port)
+    msg = {
+        'type': 'client_desc',
+        'nickname': get_nickname(args),
+    }
+    try:
+        game.socket.send(str.encode(json.dumps(msg)))
+    except BrokenPipeError:
+        logger.error("Connection to server broken.")
+        exit(1)
 
     if args.ai:
         ai = get_ai_constructor(args.ai)(game)
