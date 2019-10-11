@@ -34,8 +34,8 @@ class Board(object):
         """
         return sum([area.dice() for area in self.get_player_areas(player)])
 
-    def get_players_regions(self, player_name):
-        area_names_to_test = [area.get_name() for area in self.get_player_areas(player_name)]
+    def get_players_regions(self, player_name, skip_area=None):
+        area_names_to_test = [area.get_name() for area in self.get_player_areas(player_name) if area.get_name() != skip_area]
 
         if not area_names_to_test:
             return [[]]

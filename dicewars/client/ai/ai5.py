@@ -141,49 +141,10 @@ class AI(GenericAI):
         int
             score of the player
         """
-        board = self.game.board
-        score = 0
-        areas_to_test = []
-        player_areas = []
+        players_regions = self.board.get_players_regions(self.player_name, skip_area=skip_area)
+        max_region_size = max(len(region) for region in players_regions)
 
-        # Find player areas and skip the area specified by skip_area
-        for area in self.board.areas.values():
-            if (area.get_owner_name() == player_name and area.get_name() != skip_area):
-                areas_to_test.append(area.get_name())
-
-        if not areas_to_test:
-            return 0
-
-        areas_in_current_region = [areas_to_test[0]]
-        # Iterate over all areas belonging to the player
-        while areas_to_test:
-            areas_already_tested = []
-            # Iterate over a single region
-            while areas_in_current_region:
-                current_area = areas_in_current_region[0]
-                areas_in_current_region.remove(current_area)
-                areas_already_tested.append(current_area)
-
-                for area in board.get_area(current_area).get_adjacent_areas():
-                    if (area not in areas_already_tested and
-                        area not in areas_in_current_region and
-                        area != skip_area):
-                        if board.get_area(area).get_owner_name() == player_name:
-                            areas_in_current_region.append(area)
-
-            if len(areas_already_tested) > score:
-                score = len(areas_already_tested)
-
-            # Remove areas in the current region from the areas yet to be tested
-            for area in areas_already_tested:
-                if area in areas_to_test:
-                    areas_to_test.remove(area)
-                    player_areas.append(area)
-
-            if areas_to_test:
-                areas_in_current_region = [areas_to_test[0]]
-
-        return score
+        return max_region_size
 
     def get_largest_region(self):
         """Get size of the largest region, including the areas within
