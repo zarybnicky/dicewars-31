@@ -256,12 +256,9 @@ class AI(GenericAI):
         self.largest_region = []
         largest_region_size = 0
         largest_regions = []  # names of areas in largest regions
-        areas_to_test = []
         player_areas = []
 
-        for area in self.board.areas.values():
-            if area.get_owner_name() == self.player_name:
-                areas_to_test.append(area.get_name())
+        areas_to_test = [area.get_name() for area in board.get_player_areas(self.player_name)]
 
         if not areas_to_test:
             return 0
