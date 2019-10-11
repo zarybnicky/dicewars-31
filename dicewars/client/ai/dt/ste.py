@@ -1,5 +1,5 @@
-from .ai_base import GenericAI
-from .utils import probability_of_holding_area, probability_of_successful_attack
+from ..ai_base import GenericAI
+from ..utils import probability_of_holding_area, probability_of_successful_attack
 
 
 class AI(GenericAI):

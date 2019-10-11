@@ -15,7 +15,7 @@ from utils import get_logging_level
 
 
 def get_ai_constructor(ai_specification):
-    ai_module = importlib.import_module('dicewars.client.ai.ai{}'.format(ai_specification))
+    ai_module = importlib.import_module('dicewars.client.ai.dt.{}'.format(ai_specification))
 
     return ai_module.AI
 
@@ -37,7 +37,7 @@ def main():
     parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1')
     parser.add_argument('-d', '--debug', help="Enable debug output", default='WARN')
     parser.add_argument('-s', '--seed', help="Random seed for a client", type=int)
-    parser.add_argument('--ai', help="Ai version", type=int)
+    parser.add_argument('--ai', help="Ai version")
     args = parser.parse_args()
 
     random.seed(args.seed)

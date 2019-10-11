@@ -12,8 +12,7 @@ parser.add_argument('-s', '--strength', help="Seed for dice assignment", type=in
 parser.add_argument('-o', '--ownership', help="Seed for province assignment", type=int)
 parser.add_argument('-p', '--port', help="Server port", type=int, default=5005)
 parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1')
-parser.add_argument('--ai', help="Specify AI versions as a sequence of ints.",
-                    type=int, nargs='+')
+parser.add_argument('--ai', help="Specify AI versions as a sequence of ints.", nargs='+')
 
 procs = []
 
