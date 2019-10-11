@@ -253,13 +253,12 @@ class AI(GenericAI):
             Number of areas in the largest region
         """
         self.largest_region = []
-        largest_region_size = 0
 
-        players_regions = self.board.get_players_regions(self.board, self.player_name)
+        players_regions = self.board.get_players_regions(self.player_name)
         max_region_size = max(len(region) for region in players_regions)
         max_sized_regions = [region for region in players_regions if len(region) == max_region_size]
 
         for region in max_sized_regions:
             for area in region:
                 self.largest_region.append(area)
-        return largest_region_size
+        return max_region_size
