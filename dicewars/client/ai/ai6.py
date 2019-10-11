@@ -255,7 +255,7 @@ class AI(GenericAI):
         self.largest_region = []
         largest_region_size = 0
 
-        players_regions = get_players_regions(self.board, self.player_name)
+        players_regions = self.board.get_players_regions(self.board, self.player_name)
         max_region_size = max(len(region) for region in players_regions)
         max_sized_regions = [region for region in players_regions if len(region) == max_region_size]
 
@@ -263,40 +263,3 @@ class AI(GenericAI):
             for area in region:
                 self.largest_region.append(area)
         return largest_region_size
-
-
-def get_players_regions(board, player_name):
-    area_names_to_test = [area.get_name() for area in board.get_player_areas(player_name)]
-
-    if not area_names_to_test:
-        return 0
-
-    regions = []
-    while area_names_to_test:
-        area_names_in_current_region = get_areas_region(board, area_names_to_test[0], area_names_to_test)
-        regions.append(area_names_in_current_region)
-
-        for area in area_names_in_current_region:
-            area_names_to_test.remove(area)
-
-    return regions
-
-
-def get_areas_region(board, area_name, available_areas):
-    current_region = [area_name]
-    already_tested = []
-    while current_region:
-        current_area = current_region[0]
-        current_region.remove(current_area)
-        already_tested.append(current_area)
-
-        for neighbour_name in board.get_area(current_area).get_adjacent_areas():
-            if neighbour_name in already_tested:
-                continue
-            if neighbour_name in current_region:
-                continue
-
-            if neighbour_name in available_areas:
-                current_region.append(neighbour_name)
-
-    return current_region
