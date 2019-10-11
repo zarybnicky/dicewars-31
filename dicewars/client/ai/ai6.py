@@ -264,34 +264,34 @@ class AI(GenericAI):
             return 0
 
         while area_names_to_test:
-            areas_in_current_region = [area_names_to_test[0]]
+            area_names_in_current_region = [area_names_to_test[0]]
 
             area_names_already_tested = []
-            while areas_in_current_region:
-                current_area = areas_in_current_region[0]
-                areas_in_current_region.remove(current_area)
+            while area_names_in_current_region:
+                current_area = area_names_in_current_region[0]
+                area_names_in_current_region.remove(current_area)
                 area_names_already_tested.append(current_area)
 
                 for neighbour_name in board.get_area(current_area).get_adjacent_areas():
                     if neighbour_name in area_names_already_tested:
                         continue
-                    if neighbour_name in areas_in_current_region:
+                    if neighbour_name in area_names_in_current_region:
                         continue
 
                     if board.get_area(neighbour_name).get_owner_name() == self.player_name:
-                        areas_in_current_region.append(neighbour_name)
+                        area_names_in_current_region.append(neighbour_name)
 
-            region_size = len(area_names_already_tested)
+            region_size = len(area_names_in_current_region)
             if region_size >= largest_region_size:
                 region = []
-                for area in area_names_already_tested:
+                for area in area_names_in_current_region:
                     region.append(area)
                 if region_size > largest_region_size:
                     largest_regions = []
                 largest_regions.append(region)
                 largest_region_size = region_size
 
-            for area in area_names_already_tested:
+            for area in area_names_in_current_region:
                 if area in area_names_to_test:
                     area_names_to_test.remove(area)
                     player_areas.append(area)
