@@ -18,8 +18,7 @@ parser.add_argument('-b', '--board', help="Seed for generating board", type=int)
 parser.add_argument('-s', '--strength', help="Seed for dice assignment", type=int)
 parser.add_argument('-o', '--ownership', help="Seed for province assignment", type=int)
 parser.add_argument('-c', '--client-seed', help="Seed for clients", type=int)
-parser.add_argument('--ai', help="Specify AI versions as a sequence of ints.",
-                    type=int, nargs='+')
+parser.add_argument('--ai', help="Specify AI versions as a sequence of ints.", nargs='+')
 parser.add_argument('-r', '--report', help="State the game number on the stdout", action='store_true')
 
 procs = []

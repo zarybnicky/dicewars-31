@@ -1,7 +1,7 @@
 import numpy
 
-from .ai_base import GenericAI
-from .utils import probability_of_successful_attack, sigmoid
+from ..ai_base import GenericAI
+from ..utils import probability_of_successful_attack, sigmoid
 
 
 class AI(GenericAI):
