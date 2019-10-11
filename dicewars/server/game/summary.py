@@ -1,4 +1,5 @@
 import re
+from collections import defaultdict
 
 
 class GameSummary(object):
@@ -34,9 +35,9 @@ class GameSummary(object):
 
 
 def get_win_rates(summaries, nb_players):
-    nb_wins = {str(i): 0 for i in range(1, nb_players+1)}
+    nb_wins = defaultdict(int)
 
     for summary in summaries:
         nb_wins[summary.winner] += 1
 
-    return nb_wins
+    return dict(nb_wins)

@@ -277,8 +277,8 @@ class Game(object):
         for p in self.players:
             player = self.players[p]
             if player.get_number_of_areas() == self.board.get_number_of_areas():
-                self.summary.set_winner(player.get_name())
-                self.logger.info("Player {} wins!".format(player.get_name()))
+                self.summary.set_winner(player.get_nickname())
+                self.logger.info("Player {} ({}) wins!".format(player.get_nickname(), player.get_name()))
                 for i in self.players:
                     self.send_message(self.players[i], 'game_end', winner=player.get_name())
                 return True
@@ -387,6 +387,11 @@ class Game(object):
 
         for i in range(1, self.number_of_players + 1):
             self.connect_client(i)
+            hello_msg = self.get_message(i)
+            if hello_msg['type'] != 'client_desc':
+                raise ValueError("Client send a wrong-type hello message '{}'".format(hello_msg))
+            self.players[i].set_nickname(hello_msg['nickname'])
+
         self.logger.debug("Successfully assigned clients to all players")
 
     def connect_client(self, i):

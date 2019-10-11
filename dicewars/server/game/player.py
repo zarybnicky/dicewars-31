@@ -27,6 +27,7 @@ class Player(object):
         """
 
         self.name = name
+        self.nickname = None
         self.logger = logging.getLogger('SERVER')
 
         self.areas = []
@@ -34,6 +35,12 @@ class Player(object):
         self.client_port = None
         self.socket = None
         self.dice_reserve = 0
+
+    def set_nickname(self, nick):
+        self.nickname = nick
+
+    def get_nickname(self):
+        return self.nickname
 
     def add_area(self, area):
         """Add area to player's areas
