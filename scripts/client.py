@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 import logging
 from PyQt5.QtWidgets import QApplication
 import sys
+import random
 
 import importlib
 
@@ -25,8 +26,11 @@ def main():
     parser.add_argument('-p', '--port', help="Server port", type=int, default=5005)
     parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1')
     parser.add_argument('-d', '--debug', help="Enable debug output", default='WARN')
+    parser.add_argument('-s', '--seed', help="Random seed for a client", type=int)
     parser.add_argument('--ai', help="Ai version", type=int)
     args = parser.parse_args()
+
+    random.seed(args.seed)
 
     log_level = get_logging_level(args)
 

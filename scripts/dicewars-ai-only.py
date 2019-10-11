@@ -14,6 +14,10 @@ parser = ArgumentParser(prog='Dice_Wars')
 parser.add_argument('-n', '--nb-games', help="Number of games.", type=int, default=1)
 parser.add_argument('-p', '--port', help="Server port", type=int, default=5005)
 parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1')
+parser.add_argument('-b', '--board', help="Seed for generating board", type=int)
+parser.add_argument('-s', '--strength', help="Seed for dice assignment", type=int)
+parser.add_argument('-o', '--ownership', help="Seed for province assignment", type=int)
+parser.add_argument('-c', '--client-seed', help="Seed for clients", type=int)
 parser.add_argument('--ai', help="Specify AI versions as a sequence of ints.",
                     type=int, nargs='+')
 parser.add_argument('-r', '--report', help="State the game number on the stdout", action='store_true')
@@ -38,6 +42,12 @@ def run_single_game(args):
         "-p", str(args.port),
         "-a", str(args.address),
     ]
+    if args.board is not None:
+        server_cmd.extend(['-b', str(args.board)])
+    if args.ownership is not None:
+        server_cmd.extend(['-o', str(args.ownership)])
+    if args.strength is not None:
+        server_cmd.extend(['-s', str(args.strength)])
 
     server_output = tempfile.TemporaryFile('w+')
     procs.append(Popen(server_cmd, stdout=server_output))
@@ -49,6 +59,8 @@ def run_single_game(args):
             "-a", str(args.address),
             "--ai", str(ai_version),
         ]
+        if args.client_seed is not None:
+            client_cmd.extend(['-s', str(args.client_seed)])
 
         procs.append(Popen(client_cmd))
         sleep(0.1)
