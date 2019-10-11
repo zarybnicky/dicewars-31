@@ -1,8 +1,5 @@
-from random import shuffle
-from pprint import pprint
-
-from ..ai import GenericAI
-from .utils import attack_succcess_probability, probability_of_holding_area, probability_of_successful_attack
+from .ai_base import GenericAI
+from .utils import probability_of_holding_area, probability_of_successful_attack
 
 
 class AI(GenericAI):
@@ -10,7 +7,7 @@ class AI(GenericAI):
 
     This agent makes such moves that have a probability of successful
     attack and hold over the area until next turn higher a 20% in two-player
-    gams and higher than 40% in four-player games. In addition, it prefers 
+    gams and higher than 40% in four-player games. In addition, it prefers
     attacks initiated from its largest region.
     """
     def __init__(self, game):
@@ -18,7 +15,7 @@ class AI(GenericAI):
         Parameters
         ----------
         game : Game
-        
+
         Attributes
         ----------
         treshold : float
@@ -38,13 +35,13 @@ class AI(GenericAI):
         self.attacked = False
 
         self.possible_attackers = []
-        self.largest_region  = []
+        self.largest_region = []
 
     def ai_turn(self):
         """AI agent's turn
 
-        Agent gets a list preferred moves and makes such move that has the 
-        highest estimated hold probability, prefering moves initiated from within 
+        Agent gets a list preferred moves and makes such move that has the
+        highest estimated hold probability, prefering moves initiated from within
         the largest region. If there is no such move, the agent ends it's turn.
         """
         self.logger.debug("Looking for possible turns.")
@@ -53,10 +50,7 @@ class AI(GenericAI):
 
         if turns:
             turn = turns[0]
-            area_name = turn[0]
             self.logger.debug("Possible turn: {}".format(turn))
-            atk_area = self.board.get_area(turn[0])
-            atk_power = atk_area.get_dice()
             hold_prob = turn[3]
             self.logger.debug("{0}->{1} attack and hold probabiliy {2}".format(turn[0], turn[1], hold_prob))
 
@@ -75,7 +69,7 @@ class AI(GenericAI):
         """Find possible turns with hold higher hold probability than treshold
 
         This method returns list of all moves with probability of holding the area
-        higher than the treshold or areas with 8 dice. In addition, it includes 
+        higher than the treshold or areas with 8 dice. In addition, it includes
         the preference of these moves. The list is sorted in descending order with
         respect to preference * hold probability
         """
@@ -92,7 +86,7 @@ class AI(GenericAI):
                         atk_power = area.get_dice()
                         atk_prob = probability_of_successful_attack(self.board, area_name, adj)
                         hold_prob = atk_prob * probability_of_holding_area(self.board, adj, atk_power - 1, self.player_name)
-                        if hold_prob >= self.treshold or atk_power is 8:
+                        if hold_prob >= self.treshold or atk_power == 8:
                             preference = hold_prob
                             if area_name in self.largest_region:
                                 preference *= self.score_weight
@@ -116,7 +110,7 @@ class AI(GenericAI):
         board = self.game.board
         self.largest_region = []
         largest_region_size = 0
-        largest_region = [] # names of areas in largest region
+        largest_region = []  # names of areas in largest region
         areas_to_test = []
         player_areas = []
 

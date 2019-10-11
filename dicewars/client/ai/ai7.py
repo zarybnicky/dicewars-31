@@ -1,10 +1,7 @@
 import numpy
 
-from random import shuffle
-from pprint import pprint
-
-from ..ai import GenericAI
-from .utils import attack_succcess_probability , probability_of_successful_attack, sigmoid
+from .ai_base import GenericAI
+from .utils import probability_of_successful_attack, sigmoid
 
 
 class AI(GenericAI):
@@ -33,7 +30,7 @@ class AI(GenericAI):
         """
         super(AI, self).__init__(game)
         self.players = len(self.game.players)
-        self.largest_region  = []
+        self.largest_region = []
 
         self.players_order = game.players_order
         while self.player_name != self.players_order[0]:
@@ -47,7 +44,7 @@ class AI(GenericAI):
                             -0.64217824, -0.11354054, -0.59113493, -0.19902261]),
             5: numpy.array([0.88792394, 0.23898045, -0.50630318, -0.10684734,
                             -0.48406202, -0.12877724, -0.48004353, -0.17429738,
-                             -0.51195613, -0.12572176]),
+                            -0.51195613, -0.12572176]),
             6: numpy.array([0.84452717, 0.20915755, -0.4275969, -0.12319906,
                             -0.438397, -0.11476484, -0.44610219, -0.10640943,
                             -0.42926595, -0.15994294, -0.40215393, -0.12508173]),
@@ -174,7 +171,6 @@ class AI(GenericAI):
                         }
 
                         d_dice = self.game.board.get_player_dice(opponent_name)
-                        d_score = self.get_score_by_player(opponent_name)
                         def_dice = {
                             "loss": d_dice,
                             "win": d_dice - def_power,
@@ -277,7 +273,7 @@ class AI(GenericAI):
         board = self.game.board
         self.largest_region = []
         largest_region_size = 0
-        largest_regions = [] # names of areas in largest regions
+        largest_regions = []  # names of areas in largest regions
         areas_to_test = []
         player_areas = []
 

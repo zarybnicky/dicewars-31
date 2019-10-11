@@ -1,11 +1,11 @@
 from random import shuffle
 
-from ..ai import GenericAI
+from .ai_base import GenericAI
 
 
 class AI(GenericAI):
     """Naive player agent
-    
+
     This agent performs all possible moves in random order
     """
 
@@ -20,7 +20,7 @@ class AI(GenericAI):
     def ai_turn(self):
         """AI agent's turn
 
-        Get a random area. If it has a possible move, the agent will do it. 
+        Get a random area. If it has a possible move, the agent will do it.
         If there are no more moves, the agent ends its turn.
         """
         areas = list(self.board.areas.values())

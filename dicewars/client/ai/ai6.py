@@ -1,9 +1,7 @@
 import numpy
 
-from random import shuffle
-
-from ..ai import GenericAI
-from .utils import attack_succcess_probability , probability_of_successful_attack, sigmoid
+from .ai_base import GenericAI
+from .utils import probability_of_successful_attack, sigmoid
 
 
 class AI(GenericAI):
@@ -31,7 +29,7 @@ class AI(GenericAI):
         """
         super(AI, self).__init__(game)
         self.players = len(self.game.players)
-        self.largest_region  = []
+        self.largest_region = []
 
         self.players_order = game.players_order
         while self.player_name != self.players_order[0]:
@@ -257,7 +255,7 @@ class AI(GenericAI):
         board = self.game.board
         self.largest_region = []
         largest_region_size = 0
-        largest_regions = [] # names of areas in largest regions
+        largest_regions = []  # names of areas in largest regions
         areas_to_test = []
         player_areas = []
 

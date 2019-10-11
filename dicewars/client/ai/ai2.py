@@ -1,12 +1,12 @@
 from random import shuffle
 
-from ..ai import GenericAI
+from .ai_base import GenericAI
 
 
 class AI(GenericAI):
     """Agent using Strength Difference Checking (SDC) strategy
 
-    This agent prefers moves with highest strength difference 
+    This agent prefers moves with highest strength difference
     and doesn't make moves against areas with higher strength.
     """
     def __init__(self, game):
@@ -28,9 +28,9 @@ class AI(GenericAI):
     def ai_turn(self):
         """AI agent's turn
 
-        Creates a list with all possible moves along with associated strength 
-        difference. The list is then sorted in descending order with respect to 
-        the SD. A move with the highest SD is then made unless the highest 
+        Creates a list with all possible moves along with associated strength
+        difference. The list is then sorted in descending order with respect to
+        the SD. A move with the highest SD is then made unless the highest
         SD is lower than zero - in this case, the agent ends its turn.
         """
 
@@ -40,7 +40,7 @@ class AI(GenericAI):
 
         for area in areas:
             area_dice = area.get_dice()
-            if area_dice is 1:
+            if area_dice == 1:
                 continue
             if area.get_owner_name() == self.player_name:
                 neighbours = area.get_adjacent_areas()
