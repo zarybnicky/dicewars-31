@@ -104,6 +104,7 @@ class Game(object):
 
         if msg['type'] == 'battle':
             battle = self.battle(self.board.get_area_by_name(msg['atk']), self.board.get_area_by_name(msg['def']))
+            self.summary.add_battle()
             self.logger.debug("Battle result: {}".format(battle))
             for p in self.players:
                 self.send_message(self.players[p], 'battle', battle=battle)

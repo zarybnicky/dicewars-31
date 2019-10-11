@@ -61,6 +61,16 @@ def run_single_game(args):
     return game_summary
 
 
+class ListStats:
+    def __init__(self, the_list):
+        self.min = min(the_list)
+        self.avg = sum(the_list)/len(the_list)
+        self.max = max(the_list)
+
+    def __str__(self):
+        return 'min/avg/max {}/{}/{}'.format(self.min, self.avg, self.max)
+
+
 def main():
     """
     Run the Dice Wars game among AI's.
@@ -96,6 +106,9 @@ def main():
 
     win_numbers = get_win_rates(summaries, len(args.ai))
     sys.stdout.write("Win counts {}\n".format(win_numbers))
+
+    nb_battles_stats = ListStats([s.nb_battles for s in summaries])
+    sys.stdout.write("Nb battles {}\n".format(nb_battles_stats))
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 import unittest
 
-from server.game.summary import GameSummary
+from dicewars.server.game.summary import GameSummary
 
 
 class GameSummaryTests(unittest.TestCase):
@@ -9,3 +9,13 @@ class GameSummaryTests(unittest.TestCase):
         summary.set_winner('joe')
         reconstructed = GameSummary.from_repr(repr(summary))
         self.assertEqual(repr(reconstructed), repr(summary))
+
+    def test_repr_loading_with_battles(self):
+        summary = GameSummary()
+        summary.set_winner('joe')
+        summary.add_battle()
+        summary.add_battle()
+        reconstructed = GameSummary.from_repr(repr(summary))
+
+        self.assertEqual(repr(reconstructed), repr(summary))
+        self.assertEqual(reconstructed.nb_battles, 2)
