@@ -252,39 +252,34 @@ class AI(GenericAI):
         int
             Number of areas in the largest region
         """
-        board = self.game.board
         self.largest_region = []
         largest_region_size = 0
-        largest_regions = []  # names of areas in largest regions
 
-        area_names_to_test = [area.get_name() for area in board.get_player_areas(self.player_name)]
+        players_regions = get_players_regions(self.board, self.player_name)
+        max_region_size = max(len(region) for region in players_regions)
+        max_sized_regions = [region for region in players_regions if len(region) == max_region_size]
 
-        if not area_names_to_test:
-            return 0
-
-        players_regions = []
-        while area_names_to_test:
-            area_names_in_current_region = get_areas_region(self.board, area_names_to_test[0], area_names_to_test)
-            players_regions.append(area_names_in_current_region)
-
-            for area in area_names_in_current_region:
-                area_names_to_test.remove(area)
-
-        for region in players_regions:
-            region_size = len(region)
-            if region_size >= largest_region_size:
-                region = []
-                for area in area_names_in_current_region:
-                    region.append(area)
-                if region_size > largest_region_size:
-                    largest_regions = []
-                largest_regions.append(region)
-                largest_region_size = region_size
-
-        for region in largest_regions:
+        for region in max_sized_regions:
             for area in region:
                 self.largest_region.append(area)
         return largest_region_size
+
+
+def get_players_regions(board, player_name):
+    area_names_to_test = [area.get_name() for area in board.get_player_areas(player_name)]
+
+    if not area_names_to_test:
+        return 0
+
+    regions = []
+    while area_names_to_test:
+        area_names_in_current_region = get_areas_region(board, area_names_to_test[0], area_names_to_test)
+        regions.append(area_names_in_current_region)
+
+        for area in area_names_in_current_region:
+            area_names_to_test.remove(area)
+
+    return regions
 
 
 def get_areas_region(board, area_name, available_areas):
