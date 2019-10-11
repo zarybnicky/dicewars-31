@@ -26,11 +26,10 @@ class Board(object):
         """
         return self.areas[str(idx)]
 
+    def get_player_areas(self, player):
+        return [area for area in self.areas.values() if area.get_owner_name == player]
+
     def get_player_dice(self, player):
         """Get all dice of a single player
         """
-        dice = 0
-        for area in self.areas.values():
-            if area.get_owner_name() == player:
-                dice += area.get_dice()
-        return dice
+        return sum([area.dice() for area in self.get_player_areas(player)])
