@@ -1,4 +1,5 @@
 from ..ai_base import GenericAI
+from ..utils import possible_attacks
 from ..utils import probability_of_holding_area, probability_of_successful_attack
 
 
@@ -51,16 +52,13 @@ class AI(GenericAI):
         or have strength of eight dice.
         """
         turns = []
-        for area in self.board.areas.values():
-            if area.get_owner_name() == self.player_name and area.get_dice() > 1:
-                for adj in area.get_adjacent_areas():
-                    adjacent_area = self.board.get_area(adj)
-                    if adjacent_area.get_owner_name() != self.player_name:
-                        area_name = area.get_name()
-                        atk_power = area.get_dice()
-                        atk_prob = probability_of_successful_attack(self.board, area_name, adj)
-                        hold_prob = atk_prob * probability_of_holding_area(self.board, adj, atk_power - 1, self.player_name)
-                        if hold_prob >= 0.2 or atk_power == 8:
-                            turns.append([area_name, adj, hold_prob])
+
+        for source, target in possible_attacks(self.board, self.player_name):
+            area_name = source.get_name()
+            atk_power = source.get_dice()
+            atk_prob = probability_of_successful_attack(self.board, area_name, target.get_name())
+            hold_prob = atk_prob * probability_of_holding_area(self.board, target.get_name(), atk_power - 1, self.player_name)
+            if hold_prob >= 0.2 or atk_power == 8:
+                turns.append([area_name, target.get_name(), hold_prob])
 
         return sorted(turns, key=lambda turn: turn[2], reverse=True)
