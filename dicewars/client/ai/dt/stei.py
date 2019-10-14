@@ -34,7 +34,6 @@ class AI(GenericAI):
             self.score_weight = 2
         self.attacked = False
 
-        self.possible_attackers = []
         self.largest_region = []
 
     def ai_turn(self):
@@ -80,8 +79,6 @@ class AI(GenericAI):
                     adjacent_area = self.board.get_area(adj)
                     if adjacent_area.get_owner_name() != self.player_name:
                         area_name = area.get_name()
-                        if area_name not in self.possible_attackers:
-                            self.possible_attackers.append(area_name)
 
                         atk_power = area.get_dice()
                         atk_prob = probability_of_successful_attack(self.board, area_name, adj)
