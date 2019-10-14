@@ -2,6 +2,7 @@ import numpy
 
 from ..ai_base import GenericAI
 from ..utils import probability_of_successful_attack, sigmoid
+from ..utils import possible_attacks
 
 
 class AI(GenericAI):
@@ -109,75 +110,66 @@ class AI(GenericAI):
 
         turns.append(['end', 0, improvement])
 
-        for area in self.board.areas.values():
-            # area belongs to the player and has strength to attack
-            if area.get_owner_name() == name and area.get_dice() > 1:
-                area_name = area.get_name()
-                atk_power = area.get_dice()
+        for source, target in possible_attacks(self.board, self.player_name):
+            area_name = source.get_name()
+            atk_power = source.get_dice()
+            def_power = target.get_dice()
+            opponent_name = target.get_owner_name()
+            # check whether the attack would expand the largest region
+            increase_score = False
+            if area_name in self.largest_region:
+                increase_score = True
+            else:
+                for n in target.get_adjacent_areas():
+                    if n in self.largest_region:
+                        increase_score = True
+                        break
 
-                for adj in area.get_adjacent_areas():
-                    adjacent_area = self.board.get_area(adj)
+            a_dice = self.game.board.get_player_dice(name)
+            a_score = self.get_score_by_player(name)
+            if increase_score:
+                a_score += 1
 
-                    # adjacent area belongs to an opponent
-                    opponent_name = adjacent_area.get_owner_name()
-                    if opponent_name != name:
-                        def_power = adjacent_area.get_dice()
-                        # check whether the attack would expand the largest region
-                        increase_score = False
-                        if area_name in self.largest_region:
-                            increase_score = True
-                        else:
-                            for n in adjacent_area.get_adjacent_areas():
-                                if n in self.largest_region:
-                                    increase_score = True
-                                    break
+            atk_dice = {
+                "current": a_dice,
+                "win": a_dice + a_score,
+                "loss": a_dice + a_score - atk_power + 1,
+            }
 
-                        a_dice = self.game.board.get_player_dice(name)
-                        a_score = self.get_score_by_player(name)
-                        if increase_score:
-                            a_score += 1
+            d_dice = self.game.board.get_player_dice(opponent_name)
+            def_dice = {
+                "loss": d_dice,
+                "win": d_dice - def_power,
+            }
 
-                        atk_dice = {
-                            "current": a_dice,
-                            "win": a_dice + a_score,
-                            "loss": a_dice + a_score - atk_power + 1,
-                        }
+            atk_prob = probability_of_successful_attack(self.board, area_name, target.get_name())
+            opponent_idx = self.players_order.index(opponent_name)
+            win_features = [d for d in features]
+            win_features[0] = numpy.log(atk_dice["win"])
+            if numpy.isinf(win_features[0]):
+                win_features[0] = 0
+            win_features[opponent_idx] = numpy.log(def_dice["win"])
+            if numpy.isinf(win_features[opponent_idx]):
+                win_features[opponent_idx] = 0
 
-                        d_dice = self.game.board.get_player_dice(opponent_name)
-                        d_score = self.get_score_by_player(opponent_name)
-                        def_dice = {
-                            "loss": d_dice,
-                            "win": d_dice - def_power,
-                        }
+            loss_features = [d for d in features]
+            loss_features[0] = numpy.log(atk_dice["loss"])
+            if numpy.isinf(loss_features[0]):
+                loss_features[0] = 0
+            loss_features[opponent_idx] = numpy.log(def_dice["loss"])
+            if numpy.isinf(loss_features[opponent_idx]):
+                loss_features[opponent_idx] = 0
 
-                        atk_prob = probability_of_successful_attack(self.board, area_name, adj)
-                        opponent_idx = self.players_order.index(opponent_name)
-                        win_features = [d for d in features]
-                        win_features[0] = numpy.log(atk_dice["win"])
-                        if numpy.isinf(win_features[0]):
-                            win_features[0] = 0
-                        win_features[opponent_idx] = numpy.log(def_dice["win"])
-                        if numpy.isinf(win_features[opponent_idx]):
-                            win_features[opponent_idx] = 0
+            wp_win = sigmoid(numpy.dot(numpy.array(win_features), self.weights))
+            wp_loss = sigmoid(numpy.dot(numpy.array(loss_features), self.weights))
 
-                        loss_features = [d for d in features]
-                        loss_features[0] = numpy.log(atk_dice["loss"])
-                        if numpy.isinf(loss_features[0]):
-                            loss_features[0] = 0
-                        loss_features[opponent_idx] = numpy.log(def_dice["loss"])
-                        if numpy.isinf(loss_features[opponent_idx]):
-                            loss_features[opponent_idx] = 0
+            wp_win = sigmoid(numpy.dot(numpy.array(win_features), self.weights))
+            wp_loss = sigmoid(numpy.dot(numpy.array(loss_features), self.weights))
+            total_prob = (wp_win * atk_prob) + (wp_loss * (1.0 - atk_prob))
+            wp_atk = numpy.log(total_prob)
 
-                        wp_win = sigmoid(numpy.dot(numpy.array(win_features), self.weights))
-                        wp_loss = sigmoid(numpy.dot(numpy.array(loss_features), self.weights))
-
-                        wp_win = sigmoid(numpy.dot(numpy.array(win_features), self.weights))
-                        wp_loss = sigmoid(numpy.dot(numpy.array(loss_features), self.weights))
-                        total_prob = (wp_win * atk_prob) + (wp_loss * (1.0 - atk_prob))
-                        wp_atk = numpy.log(total_prob)
-
-                        improvement = wp_atk - wp_start
-                        turns.append([area_name, adj, improvement])
+            improvement = wp_atk - wp_start
+            turns.append([area_name, target.get_name(), improvement])
 
         return sorted(turns, key=lambda turn: turn[2], reverse=True)
 
