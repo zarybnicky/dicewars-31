@@ -26,13 +26,15 @@ class Board(object):
         """
         return self.areas[str(idx)]
 
-    def get_player_areas(self, player):
-        return [area for area in self.areas.values() if area.get_owner_name == player]
+    def get_player_areas(self, player_name):
+        return [area for area in self.areas.values() if area.get_owner_name() == player_name]
 
     def get_player_dice(self, player):
+    def get_player_dice(self, player_name):
+    def get_player_dice(self, player_name):
         """Get all dice of a single player
         """
-        return sum([area.dice() for area in self.get_player_areas(player)])
+        return sum([area.get_dice() for area in self.get_player_areas(player_name)])
 
     def get_players_regions(self, player_name, skip_area=None):
         area_names_to_test = [area.get_name() for area in self.get_player_areas(player_name) if area.get_name() != skip_area]
@@ -43,6 +45,7 @@ class Board(object):
         regions = []
         while area_names_to_test:
             area_names_in_current_region = self.get_areas_region(area_names_to_test[0], area_names_to_test)
+            assert(len(area_names_in_current_region) > 0)
             regions.append(area_names_in_current_region)
 
             for area in area_names_in_current_region:
@@ -51,20 +54,24 @@ class Board(object):
         return regions
 
     def get_areas_region(self, area_name, available_areas):
-        current_region = [area_name]
-        already_tested = []
-        while current_region:
-            current_area = current_region[0]
-            current_region.remove(current_area)
-            already_tested.append(current_area)
+        to_test = {area_name}
+        current_region = []
+
+        while to_test:
+            current_area = to_test.pop()
+
+            if current_area in current_region:
+                continue
+
+            current_region.append(current_area)
 
             for neighbour_name in self.get_area(current_area).get_adjacent_areas():
-                if neighbour_name in already_tested:
+                if neighbour_name in current_region:
                     continue
                 if neighbour_name in current_region:
                     continue
 
                 if neighbour_name in available_areas:
-                    current_region.append(neighbour_name)
+                    to_test.add(neighbour_name)
 
         return current_region
