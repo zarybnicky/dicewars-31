@@ -29,8 +29,9 @@ class Board(object):
     def get_player_areas(self, player_name):
         return [area for area in self.areas.values() if area.get_owner_name() == player_name]
 
-    def get_player_dice(self, player):
-    def get_player_dice(self, player_name):
+    def get_player_border(self, player_name):
+        return [area for area in self.get_player_areas(player_name) if self.is_at_border(area)]
+
     def get_player_dice(self, player_name):
         """Get all dice of a single player
         """
@@ -75,3 +76,14 @@ class Board(object):
                     to_test.add(neighbour_name)
 
         return current_region
+
+    def is_at_border(self, area):
+        owner = area.get_owner_name()
+        neighbourhood_names = area.get_adjacent_areas()
+
+        for neighbour_name in neighbourhood_names:
+            neighbour = self.get_area(neighbour_name)
+            if neighbour.get_owner_name() != owner:
+                return True
+
+        return False

@@ -38,20 +38,20 @@ class AI(GenericAI):
         shuffle(areas)
         attacks = []
 
-        for area in areas:
-            area_dice = area.get_dice()
-            if area_dice == 1:
+        for area in self.board.get_player_border(self.player_name):
+            if not area.can_attack():
                 continue
-            if area.get_owner_name() == self.player_name:
-                neighbours = area.get_adjacent_areas()
-                shuffle(neighbours)
 
-                for adj in neighbours:
-                    adjacent_area = self.board.get_area(adj)
-                    if adjacent_area.get_owner_name() != self.player_name:
-                        strength_difference = area_dice - adjacent_area.get_dice()
-                        attack = [area.get_name(), adj, strength_difference]
-                        attacks.append(attack)
+            neighbours = area.get_adjacent_areas()
+            shuffle(neighbours)
+
+            for adj in neighbours:
+                adjacent_area = self.board.get_area(adj)
+                if adjacent_area.get_owner_name() != self.player_name:
+                    area_dice = area.get_dice()
+                    strength_difference = area_dice - adjacent_area.get_dice()
+                    attack = [area.get_name(), adj, strength_difference]
+                    attacks.append(attack)
 
         attacks = sorted(attacks, key=lambda attack: attack[2], reverse=True)
 
