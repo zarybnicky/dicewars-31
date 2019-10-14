@@ -35,6 +35,8 @@ def signal_handler(signum, frame):
 
 
 def run_single_game(args):
+    logs = []
+
     server_cmd = [
         "./scripts/server.py",
         "-n", str(len(args.ai)),
@@ -49,7 +51,8 @@ def run_single_game(args):
         server_cmd.extend(['-s', str(args.strength)])
 
     server_output = tempfile.TemporaryFile('w+')
-    procs.append(Popen(server_cmd, stdout=server_output))
+    logs.append(open('server.log', 'w'))
+    procs.append(Popen(server_cmd, stdout=server_output, stderr=logs[-1]))
 
     for ai_version in args.ai:
         client_cmd = [
@@ -57,11 +60,13 @@ def run_single_game(args):
             "-p", str(args.port),
             "-a", str(args.address),
             "--ai", str(ai_version),
+            '--debug', 'DEBUG',
         ]
         if args.client_seed is not None:
             client_cmd.extend(['-s', str(args.client_seed)])
 
-        procs.append(Popen(client_cmd))
+        logs.append(open('client-{}.log'.format(ai_version), 'w'))
+        procs.append(Popen(client_cmd, stderr=logs[-1]))
         sleep(0.1)
 
     for p in procs:
