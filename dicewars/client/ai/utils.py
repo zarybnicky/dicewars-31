@@ -1,4 +1,5 @@
 import numpy
+from random import shuffle
 
 
 def sigmoid(a):
@@ -154,3 +155,17 @@ def attack_succcess_probability(atk, df):
             8: 0.47109073,
         },
     }[atk][df]
+
+
+def possible_attacks(board, player_name):
+    for area in board.get_player_border(player_name):
+        if not area.can_attack():
+            continue
+
+        neighbours = area.get_adjacent_areas()
+        shuffle(neighbours)
+
+        for adj in neighbours:
+            adjacent_area = board.get_area(adj)
+            if adjacent_area.get_owner_name() != player_name:
+                yield (area, adjacent_area)
