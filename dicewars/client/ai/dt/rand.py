@@ -1,6 +1,7 @@
 from random import shuffle
 
 from ..ai_base import GenericAI
+from ..utils import possible_attacks
 
 
 class AI(GenericAI):
@@ -23,18 +24,12 @@ class AI(GenericAI):
         Get a random area. If it has a possible move, the agent will do it.
         If there are no more moves, the agent ends its turn.
         """
-        areas = list(self.board.areas.values())
-        shuffle(areas)
-        for area in areas:
-            if area.get_owner_name() == self.player_name and area.get_dice() > 1:
-                neighbours = area.get_adjacent_areas()
-                shuffle(neighbours)
-                for adj in neighbours:
-                    adjacent_area = self.board.get_area(adj)
-                    if adjacent_area.get_owner_name() != self.player_name:
-                        self.send_message('battle', attacker=area.get_name(), defender=adjacent_area.get_name())
-                        self.waitingForResponse = True
-                        return True
+        attacks = list(possible_attacks(self.board, self.player_name))
+        shuffle(attacks)
+        for source, target in attacks:
+            self.send_message('battle', attacker=source.get_name(), defender=target.get_name())
+            self.waitingForResponse = True
+            return True
 
         self.logger.debug("No more possible turns.")
         self.send_message('end_turn')
