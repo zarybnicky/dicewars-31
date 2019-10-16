@@ -23,6 +23,7 @@ class GenericAI(object):
         self.board = game.board
         self.player_name = game.player_name
         self.waitingForResponse = False
+        self.moves_this_turn = 0
 
     def run(self):
         """Main AI agent loop
@@ -114,9 +115,12 @@ class GenericAI(object):
                 'atk': attacker,
                 'def': defender
             }
+            self.logger.debug("Sending battle message.")
+            self.moves_this_turn += 1
         elif type == 'end_turn':
             msg = {'type': 'end_turn'}
             self.logger.debug("Sending end_turn message.")
+            self.moves_this_turn = 0
 
         try:
             self.game.socket.send(str.encode(json.dumps(msg)))
