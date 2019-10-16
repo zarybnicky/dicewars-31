@@ -98,7 +98,7 @@ class Game(object):
     def handle_player_turn(self):
         """Handle clients message and carry out the action
         """
-        self.logger.debug("Handling player {} turn".format(self.current_player.get_name()))
+        self.logger.debug("Handling player {} ({}) turn".format(self.current_player.get_name(), self.current_player.nickname))
         player = self.current_player.get_name()
         msg = self.get_message(player)
 
