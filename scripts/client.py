@@ -20,9 +20,9 @@ def get_ai_constructor(ai_specification):
     return ai_module.AI
 
 
-def get_nickname(args):
-    if args.ai:
-        nick = '{} (AI)'.format(args.ai)
+def get_nickname(ai_spec):
+    if ai_spec is not None:
+        nick = '{} (AI)'.format(ai_spec)
     else:
         nick = 'Human'
 
@@ -50,7 +50,7 @@ def main():
     game = Game(args.address, args.port)
     msg = {
         'type': 'client_desc',
-        'nickname': get_nickname(args),
+        'nickname': get_nickname(args.ai),
     }
     try:
         game.socket.send(str.encode(json.dumps(msg)))
