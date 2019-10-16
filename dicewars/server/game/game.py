@@ -486,5 +486,7 @@ class Game(object):
         for nick in nicknames_order:
             self.players_order.append(registered_nicknames_rev[nick])
 
+        self.set_first_player()
+
     def report_player_order(self):
         self.logger.info('Player order: {}'.format([(name, self.players[name].nickname) for name in self.players_order]))
