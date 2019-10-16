@@ -3,7 +3,6 @@ import tempfile
 import sys
 from signal import signal, SIGCHLD
 from subprocess import Popen
-from time import sleep
 from argparse import ArgumentParser
 
 from dicewars.server.game.summary import GameSummary
@@ -67,7 +66,6 @@ def run_single_game(args, game_no):
 
         logs.append(open('client-{}.log'.format(ai_version), 'w'))
         procs.append(Popen(client_cmd, stderr=logs[-1]))
-        sleep(0.1)
 
     for p in procs:
         p.wait()
