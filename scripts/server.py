@@ -86,7 +86,7 @@ def main():
     random.seed(args.strength)
     assign_dice(board, args.number_of_players, area_ownership)
 
-    random.seed(5)
+    random.seed(None)  # allow for random player order
     game = Game(board, area_ownership, args.number_of_players, args.address, args.port)
     game.run()
 
