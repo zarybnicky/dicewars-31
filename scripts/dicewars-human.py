@@ -53,6 +53,7 @@ def main():
             "-n", str(args.number_of_players),
             "-p", str(args.port),
             "-a", str(args.address),
+            '--debug', 'DEBUG',
         ]
         if args.board is not None:
             cmd.extend(['-b', str(args.board)])
@@ -61,7 +62,7 @@ def main():
         if args.strength is not None:
             cmd.extend(['-s', str(args.strength)])
 
-        procs.append(Popen(cmd))
+        procs.append(Popen(cmd, stderr=open('server.log', 'w')))
 
         for i in range(1, args.number_of_players + 1):
             if i == 1:
