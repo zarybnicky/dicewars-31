@@ -1,6 +1,18 @@
 import json
 from json.decoder import JSONDecodeError
 import logging
+import signal
+
+
+class TimeoutError(Exception):
+    pass
+
+
+def TimeoutHandler(signum, handler):
+    raise TimeoutError('')
+
+
+TIME_LIMIT = 1.0  # in seconds, for every decision
 
 
 class GenericAI(object):
@@ -24,11 +36,13 @@ class GenericAI(object):
         self.player_name = game.player_name
         self.waitingForResponse = False
         self.moves_this_turn = 0
+        self.time_left_last_time = TIME_LIMIT
 
     def run(self):
         """Main AI agent loop
         """
         game = self.game
+        signal.signal(signal.SIGALRM, TimeoutHandler)
 
         while True:
             message = game.input_queue.get(block=True, timeout=None)
@@ -40,7 +54,15 @@ class GenericAI(object):
                 exit(1)
             self.current_player_name = game.current_player.get_name()
             if self.current_player_name == self.player_name and not self.waitingForResponse:
-                self.ai_turn()
+                try:
+                    signal.setitimer(signal.ITIMER_REAL, TIME_LIMIT, 0)
+                    self.ai_turn()
+                    self.time_left_last_time, _ = signal.setitimer(signal.ITIMER_REAL, 0.0, 0)
+                    self.logger.warning("Time left: {}".format(self.time_left_last_time))
+                except TimeoutError:
+                    self.logger.warning("Forced 'end_turn' because of timeout")
+                    self.send_message('end_turn')
+                    self.time_left_last_time = -1.0
 
     def ai_turn(self):
         """Actual agent behaviour
