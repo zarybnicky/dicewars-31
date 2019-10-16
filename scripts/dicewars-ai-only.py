@@ -41,6 +41,7 @@ def run_single_game(args, game_no):
         "-n", str(len(args.ai)),
         "-p", str(args.port),
         "-a", str(args.address),
+        '--debug', 'DEBUG',
     ]
     if args.board is not None:
         server_cmd.extend(['-b', str(args.board + game_no)])
