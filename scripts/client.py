@@ -11,22 +11,13 @@ import importlib
 from dicewars.client.game import Game
 from dicewars.client.ui import ClientUI
 
-from utils import get_logging_level
+from utils import get_logging_level, get_nickname
 
 
 def get_ai_constructor(ai_specification):
     ai_module = importlib.import_module('dicewars.client.ai.{}'.format(ai_specification))
 
     return ai_module.AI
-
-
-def get_nickname(ai_spec):
-    if ai_spec is not None:
-        nick = '{} (AI)'.format(ai_spec)
-    else:
-        nick = 'Human'
-
-    return nick
 
 
 def main():
