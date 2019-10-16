@@ -71,6 +71,9 @@ def run_single_game(args, game_no):
     for p in procs:
         p.wait()
 
+    for log in logs:
+        log.close()
+
     server_output.seek(0)
     game_summary = GameSummary.from_repr(server_output.read())
     return game_summary
