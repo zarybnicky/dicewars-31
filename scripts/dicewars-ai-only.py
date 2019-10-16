@@ -8,6 +8,8 @@ from argparse import ArgumentParser
 from dicewars.server.game.summary import GameSummary
 from dicewars.server.game.summary import get_win_rates
 
+from utils import get_nickname
+
 
 parser = ArgumentParser(prog='Dice_Wars')
 parser.add_argument('-n', '--nb-games', help="Number of games.", type=int, default=1)
@@ -36,6 +38,8 @@ def signal_handler(signum, frame):
 def run_single_game(args, game_no):
     logs = []
 
+    ai_nicks = [get_nickname(ai) for ai in args.ai]
+
     server_cmd = [
         "./scripts/server.py",
         "-n", str(len(args.ai)),
@@ -43,6 +47,8 @@ def run_single_game(args, game_no):
         "-a", str(args.address),
         '--debug', 'DEBUG',
     ]
+    server_cmd.append('-r')
+    server_cmd.extend(ai_nicks)
     if args.board is not None:
         server_cmd.extend(['-b', str(args.board + game_no)])
     if args.ownership is not None:
