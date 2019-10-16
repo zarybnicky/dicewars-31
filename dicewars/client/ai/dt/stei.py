@@ -1,5 +1,6 @@
 from ..ai_base import GenericAI
 from ..utils import probability_of_holding_area, probability_of_successful_attack
+from ..utils import possible_attacks
 
 
 class AI(GenericAI):
@@ -34,7 +35,6 @@ class AI(GenericAI):
             self.score_weight = 2
         self.attacked = False
 
-        self.possible_attackers = []
         self.largest_region = []
 
     def ai_turn(self):
@@ -74,23 +74,15 @@ class AI(GenericAI):
         respect to preference * hold probability
         """
         turns = []
-        for area in self.board.areas.values():
-            if area.get_owner_name() == self.player_name and area.get_dice() > 1:
-                for adj in area.get_adjacent_areas():
-                    adjacent_area = self.board.get_area(adj)
-                    if adjacent_area.get_owner_name() != self.player_name:
-                        area_name = area.get_name()
-                        if area_name not in self.possible_attackers:
-                            self.possible_attackers.append(area_name)
-
-                        atk_power = area.get_dice()
-                        atk_prob = probability_of_successful_attack(self.board, area_name, adj)
-                        hold_prob = atk_prob * probability_of_holding_area(self.board, adj, atk_power - 1, self.player_name)
-                        if hold_prob >= self.treshold or atk_power == 8:
-                            preference = hold_prob
-                            if area_name in self.largest_region:
-                                preference *= self.score_weight
-                            turns.append([area.get_name(), adj, preference, hold_prob])
+        for source, target in possible_attacks(self.board, self.player_name):
+            atk_power = source.get_dice()
+            atk_prob = probability_of_successful_attack(self.board, source.get_name(), target.get_name())
+            hold_prob = atk_prob * probability_of_holding_area(self.board, target.get_name(), atk_power - 1, self.player_name)
+            if hold_prob >= self.treshold or atk_power == 8:
+                preference = hold_prob
+                if source.get_name() in self.largest_region:
+                    preference *= self.score_weight
+                turns.append([source.get_name(), target.get_name(), preference, hold_prob])
 
         return sorted(turns, key=lambda turn: turn[2], reverse=True)
 
@@ -107,48 +99,11 @@ class AI(GenericAI):
         int
             Number of areas in the largest region
         """
-        board = self.game.board
         self.largest_region = []
-        largest_region_size = 0
-        largest_region = []  # names of areas in largest region
-        areas_to_test = []
-        player_areas = []
 
-        for area in self.board.areas.values():
-            if area.get_owner_name() == self.player_name:
-                areas_to_test.append(area.get_name())
+        players_regions = self.board.get_players_regions(self.player_name)
+        max_region_size = max(len(region) for region in players_regions)
+        max_sized_regions = [region for region in players_regions if len(region) == max_region_size]
 
-        if not areas_to_test:
-            return 0
-
-        areas_in_current_region = [areas_to_test[0]]
-
-        while areas_to_test:
-            areas_already_tested = []
-            while areas_in_current_region:
-                current_area = areas_in_current_region[0]
-                areas_in_current_region.remove(current_area)
-                areas_already_tested.append(current_area)
-
-                for area in board.get_area(current_area).get_adjacent_areas():
-                    if (area not in areas_already_tested and
-                        area not in areas_in_current_region):
-                        if board.get_area(area).get_owner_name() == self.player_name:
-                            areas_in_current_region.append(area)
-
-            if len(areas_already_tested) > largest_region_size:
-                for area in areas_already_tested:
-                    largest_region.append(area)
-                largest_region_size = len(areas_already_tested)
-
-            for area in areas_already_tested:
-                if area in areas_to_test:
-                    areas_to_test.remove(area)
-                    player_areas.append(area)
-
-            if areas_to_test:
-                areas_in_current_region = [areas_to_test[0]]
-
-        for area in largest_region:
-            self.largest_region.append(area)
-        return largest_region_size
+        self.largest_region = max_sized_regions[0]
+        return max_region_size

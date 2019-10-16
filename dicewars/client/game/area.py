@@ -44,7 +44,7 @@ class Area(object):
         """
         return self.owner_name
 
-    def has_dice(self):
+    def can_attack(self):
         """Return True if area has enough dice to attack
         """
         return self.dice >= 2

@@ -130,7 +130,7 @@ class MainWindow(QWidget):
                     self.game.send_message('battle', self.activated_area_name, area.get_name())
             elif (area.get_owner_name() == self.game.player_name and
                   self.game.player_name == self.game.current_player.get_name()
-                  and area.has_dice()):
+                  and area.can_attack()):
                 # area activation
                 self.activated_area_name = area.get_name()
                 self.activated_area = area

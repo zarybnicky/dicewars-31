@@ -34,7 +34,7 @@ def signal_handler(signum, frame):
             pass
 
 
-def run_single_game(args):
+def run_single_game(args, game_no):
     logs = []
 
     server_cmd = [
@@ -44,7 +44,7 @@ def run_single_game(args):
         "-a", str(args.address),
     ]
     if args.board is not None:
-        server_cmd.extend(['-b', str(args.board)])
+        server_cmd.extend(['-b', str(args.board + game_no)])
     if args.ownership is not None:
         server_cmd.extend(['-o', str(args.ownership)])
     if args.strength is not None:
@@ -108,7 +108,7 @@ def main():
         if args.report:
             sys.stdout.write('\r{}'.format(i))
         try:
-            game_summary = run_single_game(args)
+            game_summary = run_single_game(args, i)
             summaries.append(game_summary)
         except KeyboardInterrupt:
             for p in procs:

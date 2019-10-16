@@ -2,6 +2,7 @@ import numpy
 
 from ..ai_base import GenericAI
 from ..utils import probability_of_successful_attack, sigmoid
+from ..utils import possible_attacks
 
 
 class AI(GenericAI):
@@ -86,44 +87,37 @@ class AI(GenericAI):
 
         self.get_largest_region()
 
-        for area in self.board.areas.values():
-            # area belongs to the player and has strength to attack
-            if area.get_owner_name() == self.player_name and area.get_dice() > 1:
-                area_name = area.get_name()
-                atk_power = area.get_dice()
+        for source, target in possible_attacks(self.board, self.player_name):
+            area_name = source.get_name()
+            atk_power = source.get_dice()
 
-                for adj in area.get_adjacent_areas():
-                    adjacent_area = self.board.get_area(adj)
+            opponent_name = target.get_owner_name()
 
-                    # adjacent area belongs to an opponent
-                    opponent_name = adjacent_area.get_owner_name()
-                    if opponent_name != self.player_name:
-                        # check whether the attack would expand the largest region
-                        increase_score = False
-                        if area_name in self.largest_region:
-                            increase_score = True
-                        else:
-                            for n in adjacent_area.get_adjacent_areas():
-                                if n in self.largest_region:
-                                    increase_score = True
-                                    break
+            increase_score = False
+            if area_name in self.largest_region:
+                increase_score = True
+            else:
+                for n in target.get_adjacent_areas():
+                    if n in self.largest_region:
+                        increase_score = True
+                        break
 
-                        if increase_score or atk_power == 8:
-                            atk_prob = numpy.log(probability_of_successful_attack(self.board, area_name, adj))
-                            new_features = []
-                            for p in self.players_order:
-                                idx = self.players_order.index(p)
-                                if p == self.player_name:
-                                    new_features.append(features[idx] + 1 if increase_score else features[idx])
-                                elif p == opponent_name:
-                                    new_features.append(self.get_score_by_player(p, skip_area=adj))
-                                else:
-                                    new_features.append(features[idx])
-                            new_win_prob = numpy.log(sigmoid(numpy.dot(numpy.array(new_features), self.weights)))
-                            total_prob = new_win_prob + atk_prob
-                            improvement = total_prob - win_prob
-                            if improvement >= -1:
-                                turns.append([area_name, adj, improvement])
+            if increase_score or atk_power == 8:
+                atk_prob = numpy.log(probability_of_successful_attack(self.board, area_name, target.get_name()))
+                new_features = []
+                for p in self.players_order:
+                    idx = self.players_order.index(p)
+                    if p == self.player_name:
+                        new_features.append(features[idx] + 1 if increase_score else features[idx])
+                    elif p == opponent_name:
+                        new_features.append(self.get_score_by_player(p, skip_area=target.get_name()))
+                    else:
+                        new_features.append(features[idx])
+                new_win_prob = numpy.log(sigmoid(numpy.dot(numpy.array(new_features), self.weights)))
+                total_prob = new_win_prob + atk_prob
+                improvement = total_prob - win_prob
+                if improvement >= -1:
+                    turns.append([area_name, target.get_name(), improvement])
 
         return sorted(turns, key=lambda turn: turn[2], reverse=True)
 
