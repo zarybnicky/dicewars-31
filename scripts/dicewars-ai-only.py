@@ -3,11 +3,12 @@ import tempfile
 import sys
 from signal import signal, SIGCHLD
 from subprocess import Popen
-from time import sleep
 from argparse import ArgumentParser
 
 from dicewars.server.game.summary import GameSummary
 from dicewars.server.game.summary import get_win_rates
+
+from utils import get_nickname
 
 
 parser = ArgumentParser(prog='Dice_Wars')
@@ -37,12 +38,17 @@ def signal_handler(signum, frame):
 def run_single_game(args, game_no):
     logs = []
 
+    ai_nicks = [get_nickname(ai) for ai in args.ai]
+
     server_cmd = [
         "./scripts/server.py",
         "-n", str(len(args.ai)),
         "-p", str(args.port),
         "-a", str(args.address),
+        '--debug', 'DEBUG',
     ]
+    server_cmd.append('-r')
+    server_cmd.extend(ai_nicks)
     if args.board is not None:
         server_cmd.extend(['-b', str(args.board + game_no)])
     if args.ownership is not None:
@@ -67,10 +73,12 @@ def run_single_game(args, game_no):
 
         logs.append(open('client-{}.log'.format(ai_version), 'w'))
         procs.append(Popen(client_cmd, stderr=logs[-1]))
-        sleep(0.1)
 
     for p in procs:
         p.wait()
+
+    for log in logs:
+        log.close()
 
     server_output.seek(0)
     game_summary = GameSummary.from_repr(server_output.read())

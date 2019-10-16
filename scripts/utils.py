@@ -12,3 +12,12 @@ def get_logging_level(args):
         logging = 30
 
     return logging
+
+
+def get_nickname(ai_spec):
+    if ai_spec is not None:
+        nick = '{} (AI)'.format(ai_spec)
+    else:
+        nick = 'Human'
+
+    return nick

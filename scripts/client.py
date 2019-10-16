@@ -11,22 +11,13 @@ import importlib
 from dicewars.client.game import Game
 from dicewars.client.ui import ClientUI
 
-from utils import get_logging_level
+from utils import get_logging_level, get_nickname
 
 
 def get_ai_constructor(ai_specification):
-    ai_module = importlib.import_module('dicewars.client.ai.dt.{}'.format(ai_specification))
+    ai_module = importlib.import_module('dicewars.client.ai.{}'.format(ai_specification))
 
     return ai_module.AI
-
-
-def get_nickname(args):
-    if args.ai:
-        nick = '{} (AI)'.format(args.ai)
-    else:
-        nick = 'Human'
-
-    return nick
 
 
 def main():
@@ -50,7 +41,7 @@ def main():
     game = Game(args.address, args.port)
     msg = {
         'type': 'client_desc',
-        'nickname': get_nickname(args),
+        'nickname': get_nickname(args.ai),
     }
     try:
         game.socket.send(str.encode(json.dumps(msg)))
