@@ -13,7 +13,7 @@ from .summary import GameSummary
 class Game(object):
     """Instance of the game
     """
-    def __init__(self, board, area_ownership, players, addr, port):
+    def __init__(self, board, area_ownership, players, addr, port, nicknames_order):
         """Initialize game and connect clients
 
         Parameters
@@ -47,6 +47,10 @@ class Game(object):
         self.logger.debug("Board initialized")
 
         self.connect_clients()
+        if nicknames_order is not None:
+            self.adjust_player_order(nicknames_order)
+
+        self.report_player_order()
 
         self.summary = GameSummary()
 
@@ -472,3 +476,15 @@ class Game(object):
         for area_name, player_name in ownership.items():
             area = self.board.get_area_by_name(area_name)
             self.assign_area(area, self.players[player_name])
+
+    def adjust_player_order(self, nicknames_order):
+        registered_nicknames_rev = {player.nickname: player_name for player_name, player in self.players.items()}
+        assert(len(nicknames_order) == len(registered_nicknames_rev))
+        assert(set(nicknames_order) == set(registered_nicknames_rev.keys()))
+
+        self.players_order = []
+        for nick in nicknames_order:
+            self.players_order.append(registered_nicknames_rev[nick])
+
+    def report_player_order(self):
+        self.logger.info('Player order: {}'.format([(name, self.players[name].nickname) for name in self.players_order]))

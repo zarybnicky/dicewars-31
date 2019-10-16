@@ -89,7 +89,7 @@ def main():
     assign_dice(board, args.number_of_players, area_ownership)
 
     random.seed(None)  # allow for random player order
-    game = Game(board, area_ownership, args.number_of_players, args.address, args.port)
+    game = Game(board, area_ownership, args.number_of_players, args.address, args.port, args.order)
     game.run()
 
 
