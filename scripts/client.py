@@ -15,7 +15,7 @@ from utils import get_logging_level
 
 
 def get_ai_constructor(ai_specification):
-    ai_module = importlib.import_module('dicewars.client.ai.dt.{}'.format(ai_specification))
+    ai_module = importlib.import_module('dicewars.client.ai.{}'.format(ai_specification))
 
     return ai_module.AI
 
