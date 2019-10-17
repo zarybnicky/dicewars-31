@@ -96,7 +96,7 @@ class ListStats:
         self.max = max(the_list)
 
     def __str__(self):
-        return 'min/avg/max {}/{}/{}'.format(self.min, self.avg, self.max)
+        return 'min/avg/max {}/{:.2f}/{}'.format(self.min, self.avg, self.max)
 
 
 def main():
