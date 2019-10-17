@@ -263,7 +263,7 @@ class Game(object):
         idx = self.players_order[(current_idx + 1) % self.number_of_players]
         while True:
             try:
-                if self.players[idx].get_largest_region(self.board) == 0:
+                if self.players[idx].get_number_of_areas() == 0:
                     current_idx = (current_idx + 1) % self.number_of_players
                     idx = self.players_order[(current_idx + 1) % self.number_of_players]
                     continue
