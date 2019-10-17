@@ -38,6 +38,7 @@ def signal_handler(signum, frame):
 
 def run_single_game(args, game_no):
     logs = []
+    procs.clear()
 
     ai_nicks = [get_nickname(ai) for ai in args.ai]
 
