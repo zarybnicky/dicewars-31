@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
-import tempfile
 import sys
 from signal import signal, SIGCHLD
-from subprocess import Popen
 from argparse import ArgumentParser
 
-from dicewars.server.game.summary import GameSummary
 from dicewars.server.game.summary import get_win_rates
-
-from utils import get_nickname
+from utils import run_ai_only_game
 
 
 parser = ArgumentParser(prog='Dice_Wars')
@@ -34,59 +30,6 @@ def signal_handler(signum, frame):
             p.kill()
         except ProcessLookupError:
             pass
-
-
-def run_single_game(port, address, ais, board=None, ownership=None, strength=None, fixed=None, client_seed=None):
-    logs = []
-    procs.clear()
-
-    ai_nicks = [get_nickname(ai) for ai in ais]
-
-    server_cmd = [
-        "./scripts/server.py",
-        "-n", str(len(ais)),
-        "-p", str(port),
-        "-a", str(address),
-        '--debug', 'DEBUG',
-    ]
-    server_cmd.append('-r')
-    server_cmd.extend(ai_nicks)
-    if board is not None:
-        server_cmd.extend(['-b', str(board)])
-    if ownership is not None:
-        server_cmd.extend(['-o', str(ownership)])
-    if strength is not None:
-        server_cmd.extend(['-s', str(strength)])
-    if fixed is not None:
-        server_cmd.extend(['-f', str(fixed)])
-
-    server_output = tempfile.TemporaryFile('w+')
-    logs.append(open('server.log', 'w'))
-    procs.append(Popen(server_cmd, stdout=server_output, stderr=logs[-1]))
-
-    for ai_version in ais:
-        client_cmd = [
-            "./scripts/client.py",
-            "-p", str(port),
-            "-a", str(address),
-            "--ai", str(ai_version),
-            '--debug', 'DEBUG',
-        ]
-        if client_seed is not None:
-            client_cmd.extend(['-s', str(client_seed)])
-
-        logs.append(open('client-{}.log'.format(ai_version), 'w'))
-        procs.append(Popen(client_cmd, stderr=logs[-1]))
-
-    for p in procs:
-        p.wait()
-
-    for log in logs:
-        log.close()
-
-    server_output.seek(0)
-    game_summary = GameSummary.from_repr(server_output.read())
-    return game_summary
 
 
 class ListStats:
@@ -121,8 +64,8 @@ def main():
             sys.stdout.write('\r{}'.format(i))
         try:
             board_seed = None if args.board is None else args.board + i
-            game_summary = run_single_game(
-                args.port, args.address, args.ai,
+            game_summary = run_ai_only_game(
+                args.port, args.address, procs, args.ai,
                 board=board_seed,
                 ownership=args.ownership,
                 strength=args.strength,
