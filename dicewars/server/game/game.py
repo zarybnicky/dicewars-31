@@ -43,8 +43,6 @@ class Game(object):
 
         self.board = board
         self.initialize_players()
-        self.assign_areas_to_players(area_ownership)
-        self.logger.debug("Board initialized")
 
         self.connect_clients()
         if nicknames_order is not None:
