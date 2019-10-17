@@ -1,4 +1,3 @@
-import re
 from collections import defaultdict
 
 
@@ -22,11 +21,10 @@ class GameSummary(object):
 
     @classmethod
     def from_repr(cls, str_repr):
-        repr_re = re.compile(r''' Winner:\ (?P<winner>.+)\n Battles\ total:\ (?P<nb_battles>.+)\n ''', re.VERBOSE | re.MULTILINE)
+        lines = str_repr.split('\n')
 
-        m = repr_re.match(str_repr)
-        winner = m.group('winner')
-        nb_battles = int(m.group('nb_battles'))
+        winner = lines[0].split(maxsplit=1)[1]
+        nb_battles = int(lines[1].split()[2])
 
         summary = cls()
         summary.set_winner(winner)
