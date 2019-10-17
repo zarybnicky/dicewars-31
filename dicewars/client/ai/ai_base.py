@@ -138,7 +138,7 @@ class GenericAI(object):
                 'atk': attacker,
                 'def': defender
             }
-            self.logger.debug("Sending battle message.")
+            self.logger.debug("Sending battle message {}->{}".format(attacker, defender))
             self.moves_this_turn += 1
         elif type == 'end_turn':
             msg = {'type': 'end_turn'}
