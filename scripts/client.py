@@ -4,7 +4,6 @@ import logging
 from PyQt5.QtWidgets import QApplication
 import sys
 import random
-import json
 
 import importlib
 
@@ -38,16 +37,11 @@ def main():
     logging.basicConfig(level=log_level)
     logger = logging.getLogger('CLIENT')
 
-    game = Game(args.address, args.port)
-    msg = {
+    hello_msg = {
         'type': 'client_desc',
         'nickname': get_nickname(args.ai),
     }
-    try:
-        game.socket.send(str.encode(json.dumps(msg)))
-    except BrokenPipeError:
-        logger.error("Connection to server broken.")
-        exit(1)
+    game = Game(args.address, args.port, hello_msg)
 
     if args.ai:
         ai = get_ai_constructor(args.ai)(game)

@@ -13,7 +13,7 @@ from dicewars.client.socket_listener import SocketListener
 class Game(object):
     """Represantation of the game state
     """
-    def __init__(self, addr, port):
+    def __init__(self, addr, port, hello_msg):
         """
         Parameters
         ----------
@@ -42,6 +42,12 @@ class Game(object):
                     exit(1)
                 i += 1
                 sleep(0.01)
+
+        try:
+            self.socket.send(str.encode(json.dumps(hello_msg)))
+        except BrokenPipeError:
+            self.logger.error("Connection to server broken.")
+            exit(1)
 
         self.start_socket_daemon()
         while self.input_queue.empty():
