@@ -36,6 +36,7 @@ class GenericAI(object):
         self.player_name = game.player_name
         self.waitingForResponse = False
         self.moves_this_turn = 0
+        self.turns_finished = 0
         self.time_left_last_time = TIME_LIMIT
 
     def run(self):
@@ -137,12 +138,13 @@ class GenericAI(object):
                 'atk': attacker,
                 'def': defender
             }
-            self.logger.debug("Sending battle message.")
+            self.logger.debug("Sending battle message {}->{}".format(attacker, defender))
             self.moves_this_turn += 1
         elif type == 'end_turn':
             msg = {'type': 'end_turn'}
             self.logger.debug("Sending end_turn message.")
             self.moves_this_turn = 0
+            self.turns_finished += 1
 
         try:
             self.game.socket.send(str.encode(json.dumps(msg)))

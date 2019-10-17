@@ -52,6 +52,9 @@ class Game(object):
 
         self.report_player_order()
 
+        for player in self.players.values():
+            self.send_message(player, 'game_start')
+
         self.summary = GameSummary()
 
     def run(self):
@@ -403,7 +406,6 @@ class Game(object):
         """
         sock, client_address = self.socket.accept()
         player = self.add_client(sock, client_address, i)
-        self.send_message(player, 'game_start')
 
     def add_client(self, connection, client_address, i):
         """Add client's socket to an instance of Player
@@ -485,6 +487,8 @@ class Game(object):
         self.players_order = []
         for nick in nicknames_order:
             self.players_order.append(registered_nicknames_rev[nick])
+
+        self.set_first_player()
 
     def report_player_order(self):
         self.logger.info('Player order: {}'.format([(name, self.players[name].nickname) for name in self.players_order]))
