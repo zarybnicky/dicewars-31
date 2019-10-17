@@ -49,8 +49,10 @@ class Game(object):
         self.connect_clients()
         if nicknames_order is not None:
             self.adjust_player_order(nicknames_order)
-
         self.report_player_order()
+
+        self.assign_areas_to_players(area_ownership)
+        self.logger.debug("Board initialized")
 
         for player in self.players.values():
             self.send_message(player, 'game_start')
@@ -405,7 +407,7 @@ class Game(object):
         """Assign client to an instance of Player
         """
         sock, client_address = self.socket.accept()
-        player = self.add_client(sock, client_address, i)
+        self.add_client(sock, client_address, i)
 
     def add_client(self, connection, client_address, i):
         """Add client's socket to an instance of Player
@@ -480,6 +482,14 @@ class Game(object):
             self.assign_area(area, self.players[player_name])
 
     def adjust_player_order(self, nicknames_order):
+        renumbering = {old_name: nicknames_order.index(player.nickname)+1 for old_name, player in self.players.items()}
+
+        self.players = {renumbering[old_name]: player for old_name, player in self.players.items()}
+        for name, player in self.players.items():
+            player.name = name
+
+        self.client_sockets = {renumbering[old_name]: socket for old_name, socket in self.client_sockets.items()}
+
         registered_nicknames_rev = {player.nickname: player_name for player_name, player in self.players.items()}
         assert(len(nicknames_order) == len(registered_nicknames_rev))
         assert(set(nicknames_order) == set(registered_nicknames_rev.keys()))
