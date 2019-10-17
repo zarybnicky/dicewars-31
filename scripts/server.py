@@ -69,6 +69,7 @@ def main():
     parser.add_argument('-b', '--board', help="Random seed to be used for board creating", type=int)
     parser.add_argument('-o', '--ownership', help="Random seed to be used for province assignment", type=int)
     parser.add_argument('-s', '--strength', help="Random seed to be used for dice assignment", type=int)
+    parser.add_argument('-f', '--fixed', help="Random seed to be used for player order and dice rolls", type=int)
     parser.add_argument('-r', '--order', nargs='+',
                         help="Random seed to be used for dice assignment")
     args = parser.parse_args()
@@ -88,7 +89,7 @@ def main():
     random.seed(args.strength)
     assign_dice(board, args.number_of_players, area_ownership)
 
-    random.seed(None)  # allow for random player order
+    random.seed(args.fixed)
     game = Game(board, area_ownership, args.number_of_players, args.address, args.port, args.order)
     game.run()
 
