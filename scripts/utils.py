@@ -1,5 +1,7 @@
-import tempfile
+import os
 from subprocess import Popen
+import tempfile
+
 from dicewars.server.game.summary import GameSummary
 
 
@@ -28,7 +30,14 @@ def get_nickname(ai_spec):
     return nick
 
 
-def run_ai_only_game(port, address, process_list, ais, board=None, ownership=None, strength=None, fixed=None, client_seed=None):
+def log_file_producer(logdir, process):
+    if logdir is None:
+        return open(os.devnull, 'w')
+    else:
+        return open('{}/{}'.format(logdir, process), 'w')
+
+
+def run_ai_only_game(port, address, process_list, ais, board=None, ownership=None, strength=None, fixed=None, client_seed=None, logdir=None):
     logs = []
     process_list.clear()
 
@@ -53,7 +62,7 @@ def run_ai_only_game(port, address, process_list, ais, board=None, ownership=Non
         server_cmd.extend(['-f', str(fixed)])
 
     server_output = tempfile.TemporaryFile('w+')
-    logs.append(open('server.log', 'w'))
+    logs.append(log_file_producer(logdir, 'server.txt'))
     process_list.append(Popen(server_cmd, stdout=server_output, stderr=logs[-1]))
 
     for ai_version in ais:
@@ -67,7 +76,7 @@ def run_ai_only_game(port, address, process_list, ais, board=None, ownership=Non
         if client_seed is not None:
             client_cmd.extend(['-s', str(client_seed)])
 
-        logs.append(open('client-{}.log'.format(ai_version), 'w'))
+        logs.append(log_file_producer(logdir, 'client-{}.log'.format(ai_version)))
         process_list.append(Popen(client_cmd, stderr=logs[-1]))
 
     for p in process_list:
