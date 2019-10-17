@@ -19,3 +19,15 @@ class GameSummaryTests(unittest.TestCase):
 
         self.assertEqual(repr(reconstructed), repr(summary))
         self.assertEqual(reconstructed.nb_battles, 2)
+
+    def test_repr_loading_with_elimination(self):
+        summary = GameSummary()
+        summary.set_winner('joe')
+        summary.add_battle()
+        summary.add_elimination('looser', 1)
+        summary.add_battle()
+        summary.add_elimination('mediocore', 2)
+        reconstructed = GameSummary.from_repr(repr(summary))
+
+        self.assertEqual(repr(reconstructed), repr(summary))
+        self.assertEqual(reconstructed.nb_battles, 2)
