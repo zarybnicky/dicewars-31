@@ -36,44 +36,44 @@ def signal_handler(signum, frame):
             pass
 
 
-def run_single_game(args, game_no):
+def run_single_game(port, address, ais, board=None, ownership=None, strength=None, fixed=None, client_seed=None):
     logs = []
     procs.clear()
 
-    ai_nicks = [get_nickname(ai) for ai in args.ai]
+    ai_nicks = [get_nickname(ai) for ai in ais]
 
     server_cmd = [
         "./scripts/server.py",
-        "-n", str(len(args.ai)),
-        "-p", str(args.port),
-        "-a", str(args.address),
+        "-n", str(len(ais)),
+        "-p", str(port),
+        "-a", str(address),
         '--debug', 'DEBUG',
     ]
     server_cmd.append('-r')
     server_cmd.extend(ai_nicks)
-    if args.board is not None:
-        server_cmd.extend(['-b', str(args.board + game_no)])
-    if args.ownership is not None:
-        server_cmd.extend(['-o', str(args.ownership)])
-    if args.strength is not None:
-        server_cmd.extend(['-s', str(args.strength)])
-    if args.fixed is not None:
-        server_cmd.extend(['-f', str(args.fixed)])
+    if board is not None:
+        server_cmd.extend(['-b', str(board)])
+    if ownership is not None:
+        server_cmd.extend(['-o', str(ownership)])
+    if strength is not None:
+        server_cmd.extend(['-s', str(strength)])
+    if fixed is not None:
+        server_cmd.extend(['-f', str(fixed)])
 
     server_output = tempfile.TemporaryFile('w+')
     logs.append(open('server.log', 'w'))
     procs.append(Popen(server_cmd, stdout=server_output, stderr=logs[-1]))
 
-    for ai_version in args.ai:
+    for ai_version in ais:
         client_cmd = [
             "./scripts/client.py",
-            "-p", str(args.port),
-            "-a", str(args.address),
+            "-p", str(port),
+            "-a", str(address),
             "--ai", str(ai_version),
             '--debug', 'DEBUG',
         ]
-        if args.client_seed is not None:
-            client_cmd.extend(['-s', str(args.client_seed)])
+        if client_seed is not None:
+            client_cmd.extend(['-s', str(client_seed)])
 
         logs.append(open('client-{}.log'.format(ai_version), 'w'))
         procs.append(Popen(client_cmd, stderr=logs[-1]))
@@ -120,7 +120,15 @@ def main():
         if args.report:
             sys.stdout.write('\r{}'.format(i))
         try:
-            game_summary = run_single_game(args, i)
+            board_seed = None if args.board is None else args.board + i
+            game_summary = run_single_game(
+                args.port, args.address, args.ai,
+                board=board_seed,
+                ownership=args.ownership,
+                strength=args.strength,
+                fixed=args.fixed,
+                client_seed=args.client_seed,
+            )
             summaries.append(game_summary)
         except KeyboardInterrupt:
             for p in procs:
