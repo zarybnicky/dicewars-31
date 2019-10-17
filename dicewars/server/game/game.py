@@ -187,6 +187,9 @@ class Game(object):
             defender.set_owner_name(atk_name)
             self.players[atk_name].add_area(defender)
             self.players[def_name].remove_area(defender)
+            if self.players[def_name].get_number_of_areas() == 0:
+                self.logger.info("Eliminated player {} ({})".format(def_name, self.players[def_name].get_nickname()))
+
             attacker.set_dice(1)
             defender.set_dice(atk_dice - 1)
             battle['def'] = {
