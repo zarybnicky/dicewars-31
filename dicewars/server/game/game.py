@@ -188,7 +188,7 @@ class Game(object):
             self.players[atk_name].add_area(defender)
             self.players[def_name].remove_area(defender)
             if self.players[def_name].get_number_of_areas() == 0:
-                self.logger.info("Eliminated player {} ({})".format(def_name, self.players[def_name].get_nickname()))
+                self.eliminate_player(def_name)
 
             attacker.set_dice(1)
             defender.set_dice(atk_dice - 1)
@@ -275,6 +275,11 @@ class Game(object):
             except IndexError:
                 exit(1)
             return
+
+    def eliminate_player(self, player):
+        nickname = self.players[player].get_nickname()
+        self.summary.add_elimination(nickname, self.summary.nb_battles)
+        self.logger.info("Eliminated player {} ({})".format(player, nickname))
 
     def check_win_condition(self):
         """Check win conditions
