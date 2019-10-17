@@ -88,3 +88,15 @@ def run_ai_only_game(port, address, process_list, ais, board=None, ownership=Non
     server_output.seek(0)
     game_summary = GameSummary.from_repr(server_output.read())
     return game_summary
+
+
+class ListStats:
+    def __init__(self, the_list):
+        self.min = min(the_list)
+        self.avg = sum(the_list)/len(the_list)
+        self.max = max(the_list)
+
+    def __str__(self):
+        return 'min/avg/max {}/{:.2f}/{}'.format(self.min, self.avg, self.max)
+
+
