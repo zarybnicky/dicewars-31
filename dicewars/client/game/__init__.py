@@ -54,7 +54,7 @@ class Game(object):
             pass
         msg = self.input_queue.get()
 
-        self.logger.debug("Received message: {0}\n".format(msg)) #TODO
+        self.logger.debug("Received message: {0}\n".format(msg))  # TODO
         if msg['type'] == 'game_start':
             self.player_name = msg['player']
             self.add_players(int(msg['no_players']), msg['score'])
@@ -65,6 +65,8 @@ class Game(object):
         else:
             self.logger.error("Did not receive game state from server.")
             exit(1)
+
+        self.logger.info("This is player name {}, the players order is {}".format(self.player_name, self.players_order))
 
     ##################
     # INITIALIZATION #

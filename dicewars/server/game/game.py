@@ -43,14 +43,14 @@ class Game(object):
 
         self.board = board
         self.initialize_players()
-        self.assign_areas_to_players(area_ownership)
-        self.logger.debug("Board initialized")
 
         self.connect_clients()
         if nicknames_order is not None:
             self.adjust_player_order(nicknames_order)
-
         self.report_player_order()
+
+        self.assign_areas_to_players(area_ownership)
+        self.logger.debug("Board initialized")
 
         for player in self.players.values():
             self.send_message(player, 'game_start')
@@ -187,6 +187,9 @@ class Game(object):
             defender.set_owner_name(atk_name)
             self.players[atk_name].add_area(defender)
             self.players[def_name].remove_area(defender)
+            if self.players[def_name].get_number_of_areas() == 0:
+                self.eliminate_player(def_name)
+
             attacker.set_dice(1)
             defender.set_dice(atk_dice - 1)
             battle['def'] = {
@@ -263,7 +266,7 @@ class Game(object):
         idx = self.players_order[(current_idx + 1) % self.number_of_players]
         while True:
             try:
-                if self.players[idx].get_largest_region(self.board) == 0:
+                if self.players[idx].get_number_of_areas() == 0:
                     current_idx = (current_idx + 1) % self.number_of_players
                     idx = self.players_order[(current_idx + 1) % self.number_of_players]
                     continue
@@ -272,6 +275,11 @@ class Game(object):
             except IndexError:
                 exit(1)
             return
+
+    def eliminate_player(self, player):
+        nickname = self.players[player].get_nickname()
+        self.summary.add_elimination(nickname, self.summary.nb_battles)
+        self.logger.info("Eliminated player {} ({})".format(player, nickname))
 
     def check_win_condition(self):
         """Check win conditions
@@ -405,7 +413,7 @@ class Game(object):
         """Assign client to an instance of Player
         """
         sock, client_address = self.socket.accept()
-        player = self.add_client(sock, client_address, i)
+        self.add_client(sock, client_address, i)
 
     def add_client(self, connection, client_address, i):
         """Add client's socket to an instance of Player
@@ -480,6 +488,14 @@ class Game(object):
             self.assign_area(area, self.players[player_name])
 
     def adjust_player_order(self, nicknames_order):
+        renumbering = {old_name: nicknames_order.index(player.nickname)+1 for old_name, player in self.players.items()}
+
+        self.players = {renumbering[old_name]: player for old_name, player in self.players.items()}
+        for name, player in self.players.items():
+            player.name = name
+
+        self.client_sockets = {renumbering[old_name]: socket for old_name, socket in self.client_sockets.items()}
+
         registered_nicknames_rev = {player.nickname: player_name for player_name, player in self.players.items()}
         assert(len(nicknames_order) == len(registered_nicknames_rev))
         assert(set(nicknames_order) == set(registered_nicknames_rev.keys()))

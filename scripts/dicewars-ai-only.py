@@ -18,6 +18,7 @@ parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1
 parser.add_argument('-b', '--board', help="Seed for generating board", type=int)
 parser.add_argument('-s', '--strength', help="Seed for dice assignment", type=int)
 parser.add_argument('-o', '--ownership', help="Seed for province assignment", type=int)
+parser.add_argument('-f', '--fixed', help="Random seed to be used for player order and dice rolls", type=int)
 parser.add_argument('-c', '--client-seed', help="Seed for clients", type=int)
 parser.add_argument('--ai', help="Specify AI versions as a sequence of ints.", nargs='+')
 parser.add_argument('-r', '--report', help="State the game number on the stdout", action='store_true')
@@ -37,6 +38,7 @@ def signal_handler(signum, frame):
 
 def run_single_game(args, game_no):
     logs = []
+    procs.clear()
 
     ai_nicks = [get_nickname(ai) for ai in args.ai]
 
@@ -55,6 +57,8 @@ def run_single_game(args, game_no):
         server_cmd.extend(['-o', str(args.ownership)])
     if args.strength is not None:
         server_cmd.extend(['-s', str(args.strength)])
+    if args.fixed is not None:
+        server_cmd.extend(['-f', str(args.fixed)])
 
     server_output = tempfile.TemporaryFile('w+')
     logs.append(open('server.log', 'w'))
