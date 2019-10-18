@@ -2,6 +2,8 @@ from ..ai_base import GenericAI
 from ..utils import probability_of_holding_area, probability_of_successful_attack
 from ..utils import possible_attacks
 
+from dicewars.ai.ai_base import BattleCommand, EndTurnCommand
+
 
 class AI(GenericAI):
     """Agent using improved Signle Turn Expectiminimax (STEi) strategy
@@ -54,14 +56,10 @@ class AI(GenericAI):
             hold_prob = turn[3]
             self.logger.debug("{0}->{1} attack and hold probabiliy {2}".format(turn[0], turn[1], hold_prob))
 
-            self.send_message('battle', attacker=turn[0], defender=turn[1])
-            return True
+            return BattleCommand(turn[0], turn[1])
 
         self.logger.debug("No more plays.")
-
-        self.send_message('end_turn')
-
-        return True
+        return EndTurnCommand()
 
     def possible_turns(self):
         """Find possible turns with hold higher hold probability than treshold
