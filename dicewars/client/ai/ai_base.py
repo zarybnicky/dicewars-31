@@ -59,7 +59,6 @@ class GenericAI(object):
                     signal.setitimer(signal.ITIMER_REAL, TIME_LIMIT, 0)
                     self.ai_turn()
                     self.time_left_last_time, _ = signal.setitimer(signal.ITIMER_REAL, 0.0, 0)
-                    self.logger.warning("Time left: {}".format(self.time_left_last_time))
                 except TimeoutError:
                     self.logger.warning("Forced 'end_turn' because of timeout")
                     self.send_message('end_turn')
