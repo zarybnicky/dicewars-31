@@ -74,6 +74,7 @@ def main():
 
     signal(SIGCHLD, signal_handler)
 
+    all_games = []
     boards_played = 0
     reporter = SingleLineReporter(not args.report)
     try:
@@ -93,13 +94,18 @@ def main():
                     client_seed=UNIVERSAL_SEED,
                     logdir=args.logdir,
                 )
-                for player in permuted_combatants:
-                    players_info[player].append(game_summary)
+                all_games.append(game_summary)
     except KeyboardInterrupt:
         for p in procs:
             p.kill()
 
     reporter.clean()
+
+    for game in all_games:
+        participants = game.participants()
+        for player in players_info:
+            if get_nickname(player) in participants:
+                players_info[player].append(game)
 
     performances = [PlayerPerformance(player, games) for player, games in players_info.items()]
     performances.sort(key=lambda perf: perf.winrate, reverse=True)
