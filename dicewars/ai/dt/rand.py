@@ -3,6 +3,8 @@ from random import shuffle
 from ..ai_base import GenericAI
 from ..utils import possible_attacks
 
+from dicewars.ai.ai_base import BattleCommand, EndTurnCommand
+
 
 class AI(GenericAI):
     """Naive player agent
@@ -27,10 +29,7 @@ class AI(GenericAI):
         attacks = list(possible_attacks(self.board, self.player_name))
         shuffle(attacks)
         for source, target in attacks:
-            self.send_message('battle', attacker=source.get_name(), defender=target.get_name())
-            return True
+            return BattleCommand(source.get_name(), target.get_name())
 
         self.logger.debug("No more possible turns.")
-        self.send_message('end_turn')
-
-        return True
+        return EndTurnCommand()
