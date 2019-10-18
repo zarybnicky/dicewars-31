@@ -129,9 +129,7 @@ class GenericAI(object):
         attacker : int
         defender : int
         """
-        if type == 'close':
-            msg = {'type': 'close'}
-        elif type == 'battle':
+        if type == 'battle':
             msg = {
                 'type': 'battle',
                 'atk': attacker,
@@ -144,6 +142,8 @@ class GenericAI(object):
             self.logger.debug("Sending end_turn message.")
             self.moves_this_turn = 0
             self.turns_finished += 1
+        else:
+            raise RuntimeError("Attempt to send unexpected message type {}".format(type))
 
         self.waitingForResponse = True
 
