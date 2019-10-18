@@ -1,4 +1,4 @@
-from random import shuffle
+import random
 
 from dicewars.ai.ai_base import GenericAI
 from dicewars.ai.utils import possible_attacks
@@ -31,12 +31,11 @@ class AI(GenericAI):
             return True
 
         attacks = list(possible_attacks(self.board, self.player_name))
-        shuffle(attacks)
-        for source, target in attacks:
+        if attacks:
+            source, target = random.choice(attacks)
             self.send_message('battle', attacker=source.get_name(), defender=target.get_name())
-            return True
-
-        self.logger.debug("No more possible turns.")
-        self.send_message('end_turn')
+        else:
+            self.logger.debug("No more possible turns.")
+            self.send_message('end_turn')
 
         return True
