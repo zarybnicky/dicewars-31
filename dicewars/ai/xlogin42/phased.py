@@ -27,25 +27,35 @@ class FinalAI(GenericAI):
         """
         if self.turns_finished < 3:
             self.logger.debug("Doing a random move")
-            did_attack = self.random_move()
+            attack_filter = lambda x: x
+            attack_selector = random.choice
+            attack_acceptor = lambda x: True
         else:
             self.logger.debug("Doing a serious move")
-            did_attack = self.score_inc_move()
+            attack_filter = lambda x: self.from_largest_region(x)
+            attack_selector = best_sdc_attack
+            attack_acceptor = lambda x: is_acceptable_sdc_attack(x)
 
-        if not did_attack:
-            self.logger.debug("No more possible turns.")
+        all_moves = list(possible_attacks(self.board, self.player_name))
+        if not all_moves:
+            self.logger.debug("There are no moves possible at all")
+            self.send_message('end_turn')
+            return True
+
+        moves_of_interest = attack_filter(all_moves)
+        if not moves_of_interest:
+            self.logger.debug("There are no moves of interest")
+            self.send_message('end_turn')
+            return True
+
+        the_move = attack_selector(moves_of_interest)
+
+        if attack_acceptor(the_move):
+            self.send_message('battle', attacker=the_move[0].get_name(), defender=the_move[1].get_name())
+        else:
+            self.logger.debug("The move {} is not acceptable, ending turn".format(the_move))
             self.send_message('end_turn')
 
-        return True
-
-    def random_move(self):
-        attacks = list(possible_attacks(self.board, self.player_name))
-        if not attacks:
-            return False
-
-        source, target = random.choice(attacks)
-
-        self.send_message('battle', attacker=source.get_name(), defender=target.get_name())
         return True
 
     def from_largest_region(self, attacks):
@@ -56,19 +66,3 @@ class FinalAI(GenericAI):
         the_largest_region = max_sized_regions[0]
         self.logger.debug('The largest region: {}'.format(the_largest_region))
         return [attack for attack in attacks if attack[0].get_name() in the_largest_region]
-
-    def score_inc_move(self):
-        attacks = list(possible_attacks(self.board, self.player_name))
-        self.logger.debug('All attacks available: {}'.format([(attack[0].get_name(), attack[1].get_name(), attack[0].get_dice(), attack[1].get_dice()) for attack in attacks]))
-        attacks = self.from_largest_region(attacks)
-        self.logger.debug('Expanding attacks available: {}'.format([(attack[0].get_name(), attack[1].get_name(), attack[0].get_dice(), attack[1].get_dice()) for attack in attacks]))
-        if not attacks:
-            return False
-
-        best_attack = best_sdc_attack(attacks)
-        if is_acceptable_sdc_attack(best_attack):
-            source, target, advantage = best_attack
-            self.send_message('battle', attacker=source.get_name(), defender=target.get_name())
-            return True
-        else:
-            return False
