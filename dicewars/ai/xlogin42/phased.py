@@ -4,6 +4,8 @@ from ..ai_base import GenericAI
 from ..utils import possible_attacks
 from .utils import best_sdc_attack, is_acceptable_sdc_attack
 
+from dicewars.ai.ai_base import BattleCommand, EndTurnCommand
+
 
 class FinalAI(GenericAI):
     """Naive player agent
@@ -39,22 +41,20 @@ class FinalAI(GenericAI):
         all_moves = list(possible_attacks(self.board, self.player_name))
         if not all_moves:
             self.logger.debug("There are no moves possible at all")
-            self.send_message('end_turn')
-            return
+            return EndTurnCommand()
 
         moves_of_interest = attack_filter(all_moves)
         if not moves_of_interest:
             self.logger.debug("There are no moves of interest")
-            self.send_message('end_turn')
-            return
+            return EndTurnCommand()
 
         the_move = attack_selector(moves_of_interest)
 
         if attack_acceptor(the_move):
-            self.send_message('battle', attacker=the_move[0].get_name(), defender=the_move[1].get_name())
+            return BattleCommand(the_move[0].get_name(), the_move[1].get_name())
         else:
             self.logger.debug("The move {} is not acceptable, ending turn".format(the_move))
-            self.send_message('end_turn')
+            return EndTurnCommand()
 
     def from_largest_region(self, attacks):
         players_regions = self.board.get_players_regions(self.player_name)
