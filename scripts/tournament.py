@@ -34,7 +34,7 @@ def signal_handler(signum, frame):
 PLAYING_AIs = [
     'dt.rand',
     'dt.stei',
-    'kb.phased',
+    'xlogin42',
     'xlogin00',
 ]
 NB_GAMES = 25

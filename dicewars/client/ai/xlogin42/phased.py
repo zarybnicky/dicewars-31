@@ -4,7 +4,7 @@ from ..ai_base import GenericAI
 from ..utils import possible_attacks
 
 
-class AI(GenericAI):
+class FinalAI(GenericAI):
     """Naive player agent
 
     This agent performs all possible moves in random order
@@ -16,7 +16,7 @@ class AI(GenericAI):
         ----------
         game : Game
         """
-        super(AI, self).__init__(game)
+        super().__init__(game)
 
     def ai_turn(self):
         """AI agent's turn
