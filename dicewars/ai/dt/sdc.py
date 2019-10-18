@@ -1,6 +1,8 @@
 from ..ai_base import GenericAI
 from ..utils import possible_attacks
 
+from dicewars.ai.ai_base import BattleCommand, EndTurnCommand
+
 
 class AI(GenericAI):
     """Agent using Strength Difference Checking (SDC) strategy
@@ -43,9 +45,6 @@ class AI(GenericAI):
         attacks = sorted(attacks, key=lambda attack: attack[2], reverse=True)
 
         if attacks and attacks[0][2] >= 0:
-            self.send_message('battle', attacks[0][0], attacks[0][1])
-            return True
+            return BattleCommand(attacks[0][0], attacks[0][1])
 
-        self.send_message('end_turn')
-
-        return True
+        return EndTurnCommand()

@@ -15,6 +15,16 @@ def TimeoutHandler(signum, handler):
 TIME_LIMIT = 1.0  # in seconds, for every decision
 
 
+class BattleCommand:
+    def __init__(self, source_name, target_name):
+        self.source_name = source_name
+        self.target_name = target_name
+
+
+class EndTurnCommand:
+    pass
+
+
 class GenericAI(object):
     """Basic AI agent implementation
     """
@@ -57,8 +67,9 @@ class GenericAI(object):
             if self.current_player_name == self.player_name and not self.waitingForResponse:
                 try:
                     signal.setitimer(signal.ITIMER_REAL, TIME_LIMIT, 0)
-                    self.ai_turn()
+                    command = self.ai_turn()
                     self.time_left_last_time, _ = signal.setitimer(signal.ITIMER_REAL, 0.0, 0)
+                    self.process_command(command)
                 except TimeoutError:
                     self.logger.warning("Forced 'end_turn' because of timeout")
                     self.send_message('end_turn')
@@ -122,6 +133,14 @@ class GenericAI(object):
             return False
 
         return True
+
+    def process_command(self, command):
+        if isinstance(command, BattleCommand):
+            self.send_message('battle', command.source_name, command.target_name)
+        elif isinstance(command, EndTurnCommand):
+            self.send_message('end_turn')
+        else:
+            raise RuntimeError("Unknown command: {}".format(command))
 
     def send_message(self, type, attacker=None, defender=None):
         """Send message to the server
