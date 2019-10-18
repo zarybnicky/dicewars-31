@@ -27,6 +27,9 @@ class GameSummary(object):
 
         return total_str
 
+    def participants(self):
+        return [elim[0] for elim in self.eliminations] + [self.winner]
+
     @classmethod
     def from_repr(cls, str_repr):
         lines = str_repr.split('\n')

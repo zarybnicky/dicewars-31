@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
-import sys
 from signal import signal, SIGCHLD
 from argparse import ArgumentParser
 
 import math
 import itertools
-from utils import run_ai_only_game, get_nickname, BoardDefinition
+from utils import run_ai_only_game, get_nickname, BoardDefinition, SingleLineReporter
 import random
+import pickle
 
 
 parser = ArgumentParser(prog='Dice_Wars')
-parser.add_argument('-n', '--nb-games', help="Number of games.", type=int, default=1)
 parser.add_argument('-p', '--port', help="Server port", type=int, default=5005)
 parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1')
 parser.add_argument('-b', '--board', help="Seed for generating board", type=int)
+parser.add_argument('-n', '--nb-boards', help="How many boards should be played", type=int, required=True)
+parser.add_argument('-g', '--game-size', help="How many players should play a game", type=int, required=True)
 parser.add_argument('-s', '--seed', help="Seed sampling players for a game", type=int)
 parser.add_argument('-l', '--logdir', help="Folder to store last running logs in.")
 parser.add_argument('-r', '--report', help="State the game number on the stdout", action='store_true')
+parser.add_argument('--save', help="Where to put pickled GameSummaries")
+parser.add_argument('--load', help="Which GameSummaries to start from")
 
 procs = []
 
@@ -37,7 +40,6 @@ PLAYING_AIs = [
     'xlogin42',
     'xlogin00',
 ]
-NB_GAMES = 25
 UNIVERSAL_SEED = 42
 
 players_info = {ai: [] for ai in PLAYING_AIs}
@@ -52,7 +54,10 @@ class PlayerPerformance:
         nickname = get_nickname(name)
         self.nb_games = len(games)
         self.nb_wins = sum(game.winner == nickname for game in games)
-        self.winrate = self.nb_wins/self.nb_games
+        if self.nb_games > 0:
+            self.winrate = self.nb_wins/self.nb_games
+        else:
+            self.winrate = float('nan')
         self.name = name
 
     def __str__(self):
@@ -72,19 +77,24 @@ def main():
 
     signal(SIGCHLD, signal_handler)
 
-    games_played = 0
-    for board_definition in board_definitions(args.board):
-        if games_played == NB_GAMES:
-            break
-        games_played += 1
+    if args.load:
+        with open(args.load, 'rb') as f:
+            all_games = pickle.load(f)
+    else:
+        all_games = []
 
-        combatants = get_combatants(2, players_info)
-        nb_permutations = math.factorial(len(combatants))
-        for i, permuted_combatants in enumerate(itertools.permutations(combatants)):
-            if args.report:
-                sys.stdout.write('\r' + ' '*50)
-                sys.stdout.write('\r{} {}/{} {}'.format(games_played, i+1, nb_permutations, ' vs. '.join(permuted_combatants)))
-            try:
+    boards_played = 0
+    reporter = SingleLineReporter(not args.report)
+    try:
+        for board_definition in board_definitions(args.board):
+            if boards_played == args.nb_boards:
+                break
+            boards_played += 1
+
+            combatants = get_combatants(args.game_size, players_info)
+            nb_permutations = math.factorial(len(combatants))
+            for i, permuted_combatants in enumerate(itertools.permutations(combatants)):
+                reporter.report('\r{} {}/{} {}'.format(boards_played, i+1, nb_permutations, ' vs. '.join(permuted_combatants)))
                 game_summary = run_ai_only_game(
                     args.port, args.address, procs, permuted_combatants,
                     board_definition,
@@ -92,15 +102,22 @@ def main():
                     client_seed=UNIVERSAL_SEED,
                     logdir=args.logdir,
                 )
-                for player in permuted_combatants:
-                    players_info[player].append(game_summary)
-            except KeyboardInterrupt:
-                for p in procs:
-                    p.kill()
-                break
+                all_games.append(game_summary)
+    except KeyboardInterrupt:
+        for p in procs:
+            p.kill()
 
-    if args.report:
-        sys.stdout.write('\r')
+    reporter.clean()
+
+    if args.save:
+        with open(args.save, 'wb') as f:
+            pickle.dump(all_games, f)
+
+    for game in all_games:
+        participants = game.participants()
+        for player in players_info:
+            if get_nickname(player) in participants:
+                players_info[player].append(game)
 
     performances = [PlayerPerformance(player, games) for player, games in players_info.items()]
     performances.sort(key=lambda perf: perf.winrate, reverse=True)
