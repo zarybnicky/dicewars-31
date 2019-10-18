@@ -69,6 +69,27 @@ def board_definitions(initial_board_seed):
         board_seed += 1
 
 
+class SingleLineReporter:
+    def __init__(self, mute):
+        self.last_line_len = 0
+        self.mute = mute
+
+    def clean(self):
+        if self.mute:
+            return
+
+        sys.stdout.write('\r' + ' '*self.last_line_len + ' '*len('^C'))
+        sys.stdout.write('\r')
+
+    def report(self, line):
+        if self.mute:
+            return
+
+        self.clean()
+        self.last_line_len = len(line)
+        sys.stdout.write(line)
+
+
 def main():
     args = parser.parse_args()
     random.seed(args.seed)
@@ -76,7 +97,7 @@ def main():
     signal(SIGCHLD, signal_handler)
 
     boards_played = 0
-    line_len = 0
+    reporter = SingleLineReporter(not args.report)
     try:
         for board_definition in board_definitions(args.board):
             if boards_played == args.nb_boards:
@@ -86,27 +107,21 @@ def main():
             combatants = get_combatants(args.game_size, players_info)
             nb_permutations = math.factorial(len(combatants))
             for i, permuted_combatants in enumerate(itertools.permutations(combatants)):
-                if args.report:
-                    sys.stdout.write('\r' + ' '*line_len + ' '*len('^C'))
-                    line = '\r{} {}/{} {}'.format(boards_played, i+1, nb_permutations, ' vs. '.join(permuted_combatants))
-                    line_len = len(line)
-                    sys.stdout.write(line)
-                    game_summary = run_ai_only_game(
-                        args.port, args.address, procs, permuted_combatants,
-                        board_definition,
-                        fixed=UNIVERSAL_SEED,
-                        client_seed=UNIVERSAL_SEED,
-                        logdir=args.logdir,
-                    )
-                    for player in permuted_combatants:
-                        players_info[player].append(game_summary)
+                reporter.report('\r{} {}/{} {}'.format(boards_played, i+1, nb_permutations, ' vs. '.join(permuted_combatants)))
+                game_summary = run_ai_only_game(
+                    args.port, args.address, procs, permuted_combatants,
+                    board_definition,
+                    fixed=UNIVERSAL_SEED,
+                    client_seed=UNIVERSAL_SEED,
+                    logdir=args.logdir,
+                )
+                for player in permuted_combatants:
+                    players_info[player].append(game_summary)
     except KeyboardInterrupt:
         for p in procs:
             p.kill()
 
-    if args.report:
-        sys.stdout.write('\r' + ' '*line_len + ' '*len('^C'))
-        sys.stdout.write('\r')
+    reporter.clean()
 
     performances = [PlayerPerformance(player, games) for player, games in players_info.items()]
     performances.sort(key=lambda perf: perf.winrate, reverse=True)
