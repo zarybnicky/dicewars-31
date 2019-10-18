@@ -63,6 +63,9 @@ class GenericAI(object):
                     self.logger.warning("Forced 'end_turn' because of timeout")
                     self.send_message('end_turn')
                     self.time_left_last_time = -1.0
+                if not self.waitingForResponse:
+                    self.logger.warning("Forced 'end_turn' because the implementation did nothing")
+                    self.send_message('end_turn')
 
     def ai_turn(self):
         """Actual agent behaviour
