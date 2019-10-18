@@ -5,6 +5,29 @@ import tempfile
 from dicewars.server.game.summary import GameSummary
 
 
+class BoardDefinition:
+    def __init__(self, board, ownership, strength):
+        assert(board is None or isinstance(board, int))
+        assert(ownership is None or isinstance(ownership, int))
+        assert(strength is None or isinstance(strength, int))
+        self.board = board
+        self.ownership = ownership
+        self.strength = strength
+
+    def to_args(self):
+        args = []
+        if self.board is not None:
+            args.extend(['-b', str(self.board)])
+        if self.ownership is not None:
+            args.extend(['-o', str(self.ownership)])
+        if self.strength is not None:
+            args.extend(['-s', str(self.strength)])
+        return args
+
+    def __str__(self):
+        return "board: {}, ownership: {}, strength: {}".format(self.board, self.ownership, self.strength)
+
+
 def get_logging_level(args):
     """
     Parse command-line arguments.
@@ -37,7 +60,7 @@ def log_file_producer(logdir, process):
         return open('{}/{}'.format(logdir, process), 'w')
 
 
-def run_ai_only_game(port, address, process_list, ais, board=None, ownership=None, strength=None, fixed=None, client_seed=None, logdir=None):
+def run_ai_only_game(port, address, process_list, ais, board_definition=None, fixed=None, client_seed=None, logdir=None):
     logs = []
     process_list.clear()
 
@@ -52,12 +75,8 @@ def run_ai_only_game(port, address, process_list, ais, board=None, ownership=Non
     ]
     server_cmd.append('-r')
     server_cmd.extend(ai_nicks)
-    if board is not None:
-        server_cmd.extend(['-b', str(board)])
-    if ownership is not None:
-        server_cmd.extend(['-o', str(ownership)])
-    if strength is not None:
-        server_cmd.extend(['-s', str(strength)])
+    if board_definition is not None:
+        server_cmd.extend(board_definition.to_args())
     if fixed is not None:
         server_cmd.extend(['-f', str(fixed)])
 
@@ -88,3 +107,13 @@ def run_ai_only_game(port, address, process_list, ais, board=None, ownership=Non
     server_output.seek(0)
     game_summary = GameSummary.from_repr(server_output.read())
     return game_summary
+
+
+class ListStats:
+    def __init__(self, the_list):
+        self.min = min(the_list)
+        self.avg = sum(the_list)/len(the_list)
+        self.max = max(the_list)
+
+    def __str__(self):
+        return 'min/avg/max {}/{:.2f}/{}'.format(self.min, self.avg, self.max)

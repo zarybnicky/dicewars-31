@@ -4,7 +4,7 @@ from signal import signal, SIGCHLD
 from argparse import ArgumentParser
 
 from dicewars.server.game.summary import get_win_rates
-from utils import run_ai_only_game
+from utils import run_ai_only_game, ListStats
 
 
 parser = ArgumentParser(prog='Dice_Wars')
@@ -31,16 +31,6 @@ def signal_handler(signum, frame):
             p.kill()
         except ProcessLookupError:
             pass
-
-
-class ListStats:
-    def __init__(self, the_list):
-        self.min = min(the_list)
-        self.avg = sum(the_list)/len(the_list)
-        self.max = max(the_list)
-
-    def __str__(self):
-        return 'min/avg/max {}/{:.2f}/{}'.format(self.min, self.avg, self.max)
 
 
 def main():
