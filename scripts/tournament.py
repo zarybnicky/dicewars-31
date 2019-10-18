@@ -3,7 +3,7 @@ import sys
 from signal import signal, SIGCHLD
 from argparse import ArgumentParser
 
-from utils import run_ai_only_game, get_nickname
+from utils import run_ai_only_game, get_nickname, BoardDefinition
 import random
 
 
@@ -66,11 +66,10 @@ def main():
             sys.stdout.write('\r{} {}'.format(i, ' vs. '.join(combatants)) + ' '*10)
         try:
             board_seed = None if args.board is None else args.board + i
+            board_definition = BoardDefinition(board_seed, UNIVERSAL_SEED, UNIVERSAL_SEED)
             game_summary = run_ai_only_game(
                 args.port, args.address, procs, combatants,
-                board=board_seed,
-                ownership=UNIVERSAL_SEED,
-                strength=UNIVERSAL_SEED,
+                board_definition,
                 fixed=UNIVERSAL_SEED,
                 client_seed=UNIVERSAL_SEED,
                 logdir=args.logdir,
