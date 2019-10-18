@@ -24,22 +24,13 @@ class AI(GenericAI):
         Get a random area. If it has a possible move, the agent will do it.
         If there are no more moves, the agent ends its turn.
         """
-        if self.moves_this_turn == 2:
-            self.logger.debug("I'm too well behaved. Let others play now.")
-            self.send_message('end_turn')
-            self.waitingForResponse = True
-
-            return True
-
         attacks = list(possible_attacks(self.board, self.player_name))
         shuffle(attacks)
         for source, target in attacks:
             self.send_message('battle', attacker=source.get_name(), defender=target.get_name())
-            self.waitingForResponse = True
             return True
 
         self.logger.debug("No more possible turns.")
         self.send_message('end_turn')
-        self.waitingForResponse = True
 
         return True

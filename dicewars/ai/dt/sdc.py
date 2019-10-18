@@ -44,10 +44,8 @@ class AI(GenericAI):
 
         if attacks and attacks[0][2] >= 0:
             self.send_message('battle', attacks[0][0], attacks[0][1])
-            self.waitingForResponse = True
             return True
 
         self.send_message('end_turn')
-        self.waitingForResponse = True
 
         return True

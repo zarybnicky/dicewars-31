@@ -1,8 +1,7 @@
-from random import shuffle, uniform
-import time
+import random
 
-from ..ai_base import GenericAI
-from ..utils import possible_attacks
+from dicewars.ai.ai_base import GenericAI
+from dicewars.ai.utils import possible_attacks
 
 
 class AI(GenericAI):
@@ -28,23 +27,13 @@ class AI(GenericAI):
         if self.moves_this_turn == 2:
             self.logger.debug("I'm too well behaved. Let others play now.")
             self.send_message('end_turn')
-            self.waitingForResponse = True
 
-            return True
+            return
 
         attacks = list(possible_attacks(self.board, self.player_name))
-        shuffle(attacks)
-        for source, target in attacks:
-            nap_len = uniform(0.0, 1.5)
-            self.logger.debug("Taking a nap of {} secs".format(nap_len))
-            time.sleep(nap_len)
-
+        if attacks:
+            source, target = random.choice(attacks)
             self.send_message('battle', attacker=source.get_name(), defender=target.get_name())
-            self.waitingForResponse = True
-            return True
-
-        self.logger.debug("No more possible turns.")
-        self.send_message('end_turn')
-        self.waitingForResponse = True
-
-        return True
+        else:
+            self.logger.debug("No more possible turns.")
+            self.send_message('end_turn')

@@ -63,6 +63,9 @@ class GenericAI(object):
                     self.logger.warning("Forced 'end_turn' because of timeout")
                     self.send_message('end_turn')
                     self.time_left_last_time = -1.0
+                if not self.waitingForResponse:
+                    self.logger.warning("Forced 'end_turn' because the implementation did nothing")
+                    self.send_message('end_turn')
 
     def ai_turn(self):
         """Actual agent behaviour
@@ -129,9 +132,7 @@ class GenericAI(object):
         attacker : int
         defender : int
         """
-        if type == 'close':
-            msg = {'type': 'close'}
-        elif type == 'battle':
+        if type == 'battle':
             msg = {
                 'type': 'battle',
                 'atk': attacker,
@@ -144,6 +145,10 @@ class GenericAI(object):
             self.logger.debug("Sending end_turn message.")
             self.moves_this_turn = 0
             self.turns_finished += 1
+        else:
+            raise RuntimeError("Attempt to send unexpected message type {}".format(type))
+
+        self.waitingForResponse = True
 
         try:
             self.game.socket.send(str.encode(json.dumps(msg)))

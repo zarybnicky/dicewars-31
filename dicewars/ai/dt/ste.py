@@ -35,12 +35,10 @@ class AI(GenericAI):
             self.logger.debug("{0}->{1} attack and hold probabiliy {2}".format(area_name, turn[1], hold_prob))
 
             self.send_message('battle', attacker=area_name, defender=turn[1])
-            self.waitingForResponse = True
             return True
 
         self.logger.debug("No more plays.")
         self.send_message('end_turn')
-        self.waitingForResponse = True
 
         return True
 

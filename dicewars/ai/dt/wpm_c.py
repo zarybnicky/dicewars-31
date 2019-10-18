@@ -6,12 +6,13 @@ from ..utils import possible_attacks
 
 
 class AI(GenericAI):
-    """Agent using Win Probability Maximization (WPM) using logarithms of player dice
+    """Agent using Win Probability Maximization (WPM) using logarithms
+    of player scores and dice
 
     This agent estimates win probability given the current state of the game.
-    As a feature to describe the state, a vector of logarithms of players' scores
-    is used. The agent choses such moves, that will have the highest improvement
-    in the estimated probability.
+    As a feature to describe the state, a vector of logarithms of players' dice
+    and scores is used. The agent choses such moves, that will have the highest
+    improvement in the estimated probability.
     """
     def __init__(self, game):
         """
@@ -37,13 +38,25 @@ class AI(GenericAI):
             self.players_order.append(self.players_order.pop(0))
 
         self.weights = {
-            2: numpy.array([3.06600354, -3.06600354]),
-            3: numpy.array([1.16329046, -0.81105584, -0.80085993]),
-            4: numpy.array([0.91252927, -0.55857427, -0.51781521, -0.57183507]),
-            5: numpy.array([0.80138262, -0.43013021, -0.4388323, -0.48048114, -0.45301658]),
-            6: numpy.array([0.74465716, -0.40179109, -0.39851363, -0.39515928, -0.43863283, -0.38371555]),
-            7: numpy.array([0.72382109, -0.39171476, -0.39423241, -0.38390144, -0.38401564, -0.36980703, -0.36138501]),
-            8: numpy.array([0.72340846, -0.35936507, -0.38758583, -0.35487285, -0.37616735, -0.37974499, -0.34989554, -0.37451491]),
+            2: numpy.array([1.30214778, 2.25563871, -1.30214778, -2.25563871]),
+            3: numpy.array([1.03427841, 0.50262886, -0.78619448, -0.31264667,
+                            -0.74070513, -0.3344083]),
+            4: numpy.array([1.04279419, 0.25416893, -0.64830571, -0.15321224,
+                            -0.64217824, -0.11354054, -0.59113493, -0.19902261]),
+            5: numpy.array([0.88792394, 0.23898045, -0.50630318, -0.10684734,
+                            -0.48406202, -0.12877724, -0.48004353, -0.17429738,
+                            -0.51195613, -0.12572176]),
+            6: numpy.array([0.84452717, 0.20915755, -0.4275969, -0.12319906,
+                            -0.438397, -0.11476484, -0.44610219, -0.10640943,
+                            -0.42926595, -0.15994294, -0.40215393, -0.12508173]),
+            7: numpy.array([0.77043331, 0.22744643, -0.34448306, -0.16104125,
+                            -0.34304867, -0.16545059, -0.36316993, -0.14238659,
+                            -0.37359036, -0.13535348, -0.34917492, -0.13725688,
+                            -0.36908313, -0.11803061]),
+            8: numpy.array([0.71518557, 0.2580538, -0.3303392, -0.13374949,
+                            -0.3288953, -0.16076534, -0.31261043, -0.14316612,
+                            -0.31785557, -0.16003507, -0.31410674, -0.16487769,
+                            -0.33290964, -0.12624279, -0.33843017, -0.14888412]),
         }[self.players]
         numpy.warnings.filterwarnings('ignore')
 
@@ -65,7 +78,6 @@ class AI(GenericAI):
 
             if turn[2] >= -0.05 or atk_power == 8:
                 self.send_message('battle', attacker=turn[0], defender=turn[1])
-                self.waitingForResponse = True
                 return True
 
         if turns and turns[0][0] == 'end':
@@ -75,14 +87,35 @@ class AI(GenericAI):
                 atk_power = atk_area.get_dice()
                 if atk_power == 8:
                     self.send_message('battle', attacker=area_name, defender=turns[i][1])
-                    self.waitingForResponse = True
                     return True
 
         self.logger.debug("Don't want to attack anymore.")
         self.send_message('end_turn')
-        self.waitingForResponse = True
 
         return True
+
+    def get_features(self, end_turn=False):
+        """Get features associated with a move
+
+        Parameters
+        ----------
+        end_turn : bool
+            The move is ending the turn
+
+        Returns
+        -------
+        list of int
+        """
+        features = []
+        for p in self.players_order:
+            score = numpy.log(self.get_score_by_player(p) + 1)
+            if end_turn and p == self.player_name:
+                dice = numpy.log(self.game.board.get_player_dice(p) + self.get_score_by_player(p) + 1)
+            else:
+                dice = numpy.log(self.game.board.get_player_dice(p) + 1)
+            features.append(score)
+            features.append(dice)
+        return features
 
     def possible_turns(self):
         """Get list of possible turns with the associated improvement
@@ -92,19 +125,10 @@ class AI(GenericAI):
         turns = []
         name = self.player_name
 
-        features = []
-        for p in self.players_order:
-            dice = numpy.log(self.game.board.get_player_dice(p))
-            if numpy.isinf(dice):
-                dice = 0
-            features.append(dice)
-
+        features = self.get_features()
         wp_start = numpy.log(sigmoid(numpy.dot(numpy.array(features), self.weights)))
 
-        end_features = [d for d in features]
-        end_features[0] = numpy.log(self.game.board.get_player_dice(name) + self.get_score_by_player(name))
-        if numpy.isinf(end_features[0]):
-            end_features[0] = 0
+        end_features = self.get_features(end_turn=True)
         wp_end = numpy.log(sigmoid(numpy.dot(numpy.array(end_features), self.weights)))
         improvement = wp_end - wp_start
 
@@ -143,22 +167,14 @@ class AI(GenericAI):
             }
 
             atk_prob = probability_of_successful_attack(self.board, area_name, target.get_name())
-            opponent_idx = self.players_order.index(opponent_name)
+            opponent_idx = self.players_order.index(opponent_name) * 2 + 1
             win_features = [d for d in features]
-            win_features[0] = numpy.log(atk_dice["win"])
-            if numpy.isinf(win_features[0]):
-                win_features[0] = 0
-            win_features[opponent_idx] = numpy.log(def_dice["win"])
-            if numpy.isinf(win_features[opponent_idx]):
-                win_features[opponent_idx] = 0
+            win_features[1] = numpy.log(atk_dice["win"] + 1)
+            win_features[opponent_idx] = numpy.log(def_dice["win"] + 1)
 
             loss_features = [d for d in features]
-            loss_features[0] = numpy.log(atk_dice["loss"])
-            if numpy.isinf(loss_features[0]):
-                loss_features[0] = 0
-            loss_features[opponent_idx] = numpy.log(def_dice["loss"])
-            if numpy.isinf(loss_features[opponent_idx]):
-                loss_features[opponent_idx] = 0
+            loss_features[1] = numpy.log(atk_dice["loss"] + 1)
+            loss_features[opponent_idx] = numpy.log(def_dice["loss"] + 1)
 
             wp_win = sigmoid(numpy.dot(numpy.array(win_features), self.weights))
             wp_loss = sigmoid(numpy.dot(numpy.array(loss_features), self.weights))
