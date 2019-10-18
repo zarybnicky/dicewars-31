@@ -10,10 +10,10 @@ import random
 
 
 parser = ArgumentParser(prog='Dice_Wars')
-parser.add_argument('-n', '--nb-games', help="Number of games.", type=int, default=1)
 parser.add_argument('-p', '--port', help="Server port", type=int, default=5005)
 parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1')
 parser.add_argument('-b', '--board', help="Seed for generating board", type=int)
+parser.add_argument('-n', '--nb-boards', help="How many boards should be played", type=int, required=True)
 parser.add_argument('-s', '--seed', help="Seed sampling players for a game", type=int)
 parser.add_argument('-l', '--logdir', help="Folder to store last running logs in.")
 parser.add_argument('-r', '--report', help="State the game number on the stdout", action='store_true')
@@ -37,7 +37,6 @@ PLAYING_AIs = [
     'xlogin42',
     'xlogin00',
 ]
-NB_GAMES = 25
 UNIVERSAL_SEED = 42
 
 players_info = {ai: [] for ai in PLAYING_AIs}
@@ -72,18 +71,18 @@ def main():
 
     signal(SIGCHLD, signal_handler)
 
-    games_played = 0
+    boards_played = 0
     for board_definition in board_definitions(args.board):
-        if games_played == NB_GAMES:
+        if boards_played == args.nb_boards:
             break
-        games_played += 1
+        boards_played += 1
 
         combatants = get_combatants(2, players_info)
         nb_permutations = math.factorial(len(combatants))
         for i, permuted_combatants in enumerate(itertools.permutations(combatants)):
             if args.report:
                 sys.stdout.write('\r' + ' '*50)
-                sys.stdout.write('\r{} {}/{} {}'.format(games_played, i+1, nb_permutations, ' vs. '.join(permuted_combatants)))
+                sys.stdout.write('\r{} {}/{} {}'.format(boards_played, i+1, nb_permutations, ' vs. '.join(permuted_combatants)))
             try:
                 game_summary = run_ai_only_game(
                     args.port, args.address, procs, permuted_combatants,
