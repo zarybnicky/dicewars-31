@@ -4,6 +4,8 @@ from ..ai_base import GenericAI
 from ..utils import probability_of_successful_attack, sigmoid
 from ..utils import possible_attacks
 
+from dicewars.ai.ai_base import BattleCommand, EndTurnCommand
+
 
 class AI(GenericAI):
     """Agent using Win Probability Maximization (WPM) using player scores
@@ -64,13 +66,10 @@ class AI(GenericAI):
             atk_power = atk_area.get_dice()
 
             if turn[2] >= -0.05 or atk_power == 8:
-                self.send_message('battle', attacker=turn[0], defender=turn[1])
-                return True
+                return BattleCommand(turn[0], turn[1])
 
         self.logger.debug("No more plays.")
-        self.send_message('end_turn')
-
-        return True
+        return EndTurnCommand()
 
     def possible_turns(self):
         """Get list of possible turns with the associated improvement
