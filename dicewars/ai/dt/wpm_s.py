@@ -65,12 +65,10 @@ class AI(GenericAI):
 
             if turn[2] >= -0.05 or atk_power == 8:
                 self.send_message('battle', attacker=turn[0], defender=turn[1])
-                self.waitingForResponse = True
                 return True
 
         self.logger.debug("No more plays.")
         self.send_message('end_turn')
-        self.waitingForResponse = True
 
         return True
 

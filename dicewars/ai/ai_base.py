@@ -145,6 +145,8 @@ class GenericAI(object):
             self.moves_this_turn = 0
             self.turns_finished += 1
 
+        self.waitingForResponse = True
+
         try:
             self.game.socket.send(str.encode(json.dumps(msg)))
         except BrokenPipeError:

@@ -65,7 +65,6 @@ class AI(GenericAI):
 
             if turn[2] >= -0.05 or atk_power == 8:
                 self.send_message('battle', attacker=turn[0], defender=turn[1])
-                self.waitingForResponse = True
                 return True
 
         if turns and turns[0][0] == 'end':
@@ -75,12 +74,10 @@ class AI(GenericAI):
                 atk_power = atk_area.get_dice()
                 if atk_power == 8:
                     self.send_message('battle', attacker=area_name, defender=turns[i][1])
-                    self.waitingForResponse = True
                     return True
 
         self.logger.debug("Don't want to attack anymore.")
         self.send_message('end_turn')
-        self.waitingForResponse = True
 
         return True
 

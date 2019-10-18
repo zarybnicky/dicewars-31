@@ -28,11 +28,9 @@ class AI(GenericAI):
         shuffle(attacks)
         for source, target in attacks:
             self.send_message('battle', attacker=source.get_name(), defender=target.get_name())
-            self.waitingForResponse = True
             return True
 
         self.logger.debug("No more possible turns.")
         self.send_message('end_turn')
-        self.waitingForResponse = True
 
         return True

@@ -35,7 +35,6 @@ class FinalAI(GenericAI):
         if not did_attack:
             self.logger.debug("No more possible turns.")
             self.send_message('end_turn')
-            self.waitingForResponse = True
 
         return True
 
@@ -47,7 +46,6 @@ class FinalAI(GenericAI):
         source, target = random.choice(attacks)
 
         self.send_message('battle', attacker=source.get_name(), defender=target.get_name())
-        self.waitingForResponse = True
         return True
 
     def score_inc_move(self):
@@ -71,7 +69,6 @@ class FinalAI(GenericAI):
         source, target, advantage = scored_attacks[0]
         if advantage > 0 or source.get_dice() == 8:
             self.send_message('battle', attacker=source.get_name(), defender=target.get_name())
-            self.waitingForResponse = True
             return True
         else:
             return False
