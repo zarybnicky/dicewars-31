@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-import sys
 from signal import signal, SIGCHLD
 from argparse import ArgumentParser
 
 import math
 import itertools
-from utils import run_ai_only_game, get_nickname, BoardDefinition
+from utils import run_ai_only_game, get_nickname, BoardDefinition, SingleLineReporter
 import random
 
 
@@ -67,27 +66,6 @@ def board_definitions(initial_board_seed):
     while True:
         yield BoardDefinition(board_seed, UNIVERSAL_SEED, UNIVERSAL_SEED)
         board_seed += 1
-
-
-class SingleLineReporter:
-    def __init__(self, mute):
-        self.last_line_len = 0
-        self.mute = mute
-
-    def clean(self):
-        if self.mute:
-            return
-
-        sys.stdout.write('\r' + ' '*self.last_line_len + ' '*len('^C'))
-        sys.stdout.write('\r')
-
-    def report(self, line):
-        if self.mute:
-            return
-
-        self.clean()
-        self.last_line_len = len(line)
-        sys.stdout.write(line)
 
 
 def main():

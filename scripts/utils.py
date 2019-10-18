@@ -1,4 +1,5 @@
 import os
+import sys
 from subprocess import Popen
 import tempfile
 
@@ -117,3 +118,24 @@ class ListStats:
 
     def __str__(self):
         return 'min/avg/max {}/{:.2f}/{}'.format(self.min, self.avg, self.max)
+
+
+class SingleLineReporter:
+    def __init__(self, mute):
+        self.last_line_len = 0
+        self.mute = mute
+
+    def clean(self):
+        if self.mute:
+            return
+
+        sys.stdout.write('\r' + ' '*self.last_line_len + ' '*len('^C'))
+        sys.stdout.write('\r')
+
+    def report(self, line):
+        if self.mute:
+            return
+
+        self.clean()
+        self.last_line_len = len(line)
+        sys.stdout.write(line)
