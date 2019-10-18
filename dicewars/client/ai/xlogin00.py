@@ -1,7 +1,7 @@
 from random import shuffle
 
-from ..ai_base import GenericAI
-from ..utils import possible_attacks
+from dicewars.client.ai.ai_base import GenericAI
+from dicewars.client.ai.utils import possible_attacks
 
 
 class AI(GenericAI):

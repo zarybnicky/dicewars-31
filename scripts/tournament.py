@@ -35,6 +35,7 @@ PLAYING_AIs = [
     'dt.rand',
     'dt.stei',
     'kb.phased',
+    'xlogin00',
 ]
 NB_GAMES = 25
 UNIVERSAL_SEED = 42
