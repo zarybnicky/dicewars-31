@@ -2,7 +2,7 @@ import random
 
 from ..ai_base import GenericAI
 from ..utils import possible_attacks
-from .utils import attacker_advantage
+from .utils import best_sdc_attack, is_acceptable_sdc_attack
 
 
 class FinalAI(GenericAI):
@@ -65,11 +65,9 @@ class FinalAI(GenericAI):
         if not attacks:
             return False
 
-        scored_attacks = [(source, target, attacker_advantage(source, target)) for source, target in attacks]
-        scored_attacks.sort(key=lambda attack: attack[2], reverse=True)
-
-        source, target, advantage = scored_attacks[0]
-        if advantage > 0 or source.get_dice() == 8:
+        best_attack = best_sdc_attack(attacks)
+        if is_acceptable_sdc_attack(best_attack):
+            source, target, advantage = best_attack
             self.send_message('battle', attacker=source.get_name(), defender=target.get_name())
             return True
         else:
