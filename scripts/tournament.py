@@ -55,18 +55,29 @@ class PlayerPerformance:
         return '{} {:.2f} % winrate [ {} / {} ]'.format(self.name, 100.0*self.winrate, self.nb_wins, self.nb_games)
 
 
+def board_definitions(initial_board_seed):
+    board_seed = initial_board_seed
+    while True:
+        yield BoardDefinition(board_seed, UNIVERSAL_SEED, UNIVERSAL_SEED)
+        board_seed += 1
+
+
 def main():
     args = parser.parse_args()
 
     signal(SIGCHLD, signal_handler)
 
-    for i in range(NB_GAMES):
+    games_played = 0
+    for board_definition in board_definitions(args.board):
+        if games_played == NB_GAMES:
+            break
+        games_played += 1
+
         combatants = get_combatants(2, players_info)
         if args.report:
-            sys.stdout.write('\r{} {}'.format(i, ' vs. '.join(combatants)) + ' '*10)
+            sys.stdout.write('\r' + ' '*50)
+            sys.stdout.write('\r{} {}'.format(games_played, ' vs. '.join(combatants)))
         try:
-            board_seed = None if args.board is None else args.board + i
-            board_definition = BoardDefinition(board_seed, UNIVERSAL_SEED, UNIVERSAL_SEED)
             game_summary = run_ai_only_game(
                 args.port, args.address, procs, combatants,
                 board_definition,
