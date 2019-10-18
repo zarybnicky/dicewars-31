@@ -14,6 +14,7 @@ parser.add_argument('-p', '--port', help="Server port", type=int, default=5005)
 parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1')
 parser.add_argument('-b', '--board', help="Seed for generating board", type=int)
 parser.add_argument('-n', '--nb-boards', help="How many boards should be played", type=int, required=True)
+parser.add_argument('-g', '--game-size', help="How many players should play a game", type=int, required=True)
 parser.add_argument('-s', '--seed', help="Seed sampling players for a game", type=int)
 parser.add_argument('-l', '--logdir', help="Folder to store last running logs in.")
 parser.add_argument('-r', '--report', help="State the game number on the stdout", action='store_true')
@@ -77,7 +78,7 @@ def main():
             break
         boards_played += 1
 
-        combatants = get_combatants(2, players_info)
+        combatants = get_combatants(args.game_size, players_info)
         nb_permutations = math.factorial(len(combatants))
         for i, permuted_combatants in enumerate(itertools.permutations(combatants)):
             if args.report:
