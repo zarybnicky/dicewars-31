@@ -40,13 +40,13 @@ class FinalAI(GenericAI):
         if not all_moves:
             self.logger.debug("There are no moves possible at all")
             self.send_message('end_turn')
-            return True
+            return
 
         moves_of_interest = attack_filter(all_moves)
         if not moves_of_interest:
             self.logger.debug("There are no moves of interest")
             self.send_message('end_turn')
-            return True
+            return
 
         the_move = attack_selector(moves_of_interest)
 
@@ -55,8 +55,6 @@ class FinalAI(GenericAI):
         else:
             self.logger.debug("The move {} is not acceptable, ending turn".format(the_move))
             self.send_message('end_turn')
-
-        return True
 
     def from_largest_region(self, attacks):
         players_regions = self.board.get_players_regions(self.player_name)

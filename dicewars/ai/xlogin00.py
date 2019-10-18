@@ -28,7 +28,7 @@ class AI(GenericAI):
             self.logger.debug("I'm too well behaved. Let others play now.")
             self.send_message('end_turn')
 
-            return True
+            return
 
         attacks = list(possible_attacks(self.board, self.player_name))
         if attacks:
@@ -37,5 +37,3 @@ class AI(GenericAI):
         else:
             self.logger.debug("No more possible turns.")
             self.send_message('end_turn')
-
-        return True
