@@ -48,17 +48,19 @@ class FinalAI(GenericAI):
         self.send_message('battle', attacker=source.get_name(), defender=target.get_name())
         return True
 
-    def score_inc_move(self):
+    def from_largest_region(self, attacks):
         players_regions = self.board.get_players_regions(self.player_name)
         max_region_size = max(len(region) for region in players_regions)
         max_sized_regions = [region for region in players_regions if len(region) == max_region_size]
 
         the_largest_region = max_sized_regions[0]
         self.logger.debug('The largest region: {}'.format(the_largest_region))
+        return [attack for attack in attacks if attack[0].get_name() in the_largest_region]
 
+    def score_inc_move(self):
         attacks = list(possible_attacks(self.board, self.player_name))
         self.logger.debug('All attacks available: {}'.format([(attack[0].get_name(), attack[1].get_name(), attack[0].get_dice(), attack[1].get_dice()) for attack in attacks]))
-        attacks = [attack for attack in attacks if attack[0].get_name() in the_largest_region]
+        attacks = self.from_largest_region(attacks)
         self.logger.debug('Expanding attacks available: {}'.format([(attack[0].get_name(), attack[1].get_name(), attack[0].get_dice(), attack[1].get_dice()) for attack in attacks]))
         if not attacks:
             return False
