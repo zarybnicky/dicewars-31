@@ -14,6 +14,7 @@ parser.add_argument('-n', '--nb-games', help="Number of games.", type=int, defau
 parser.add_argument('-p', '--port', help="Server port", type=int, default=5005)
 parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1')
 parser.add_argument('-b', '--board', help="Seed for generating board", type=int)
+parser.add_argument('-s', '--seed', help="Seed sampling players for a game", type=int)
 parser.add_argument('-l', '--logdir', help="Folder to store last running logs in.")
 parser.add_argument('-r', '--report', help="State the game number on the stdout", action='store_true')
 
@@ -66,6 +67,7 @@ def board_definitions(initial_board_seed):
 
 def main():
     args = parser.parse_args()
+    random.seed(args.seed)
 
     signal(SIGCHLD, signal_handler)
 
