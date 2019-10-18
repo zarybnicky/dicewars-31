@@ -76,6 +76,7 @@ def main():
     signal(SIGCHLD, signal_handler)
 
     boards_played = 0
+    line_len = 0
     try:
         for board_definition in board_definitions(args.board):
             if boards_played == args.nb_boards:
@@ -86,8 +87,10 @@ def main():
             nb_permutations = math.factorial(len(combatants))
             for i, permuted_combatants in enumerate(itertools.permutations(combatants)):
                 if args.report:
-                    sys.stdout.write('\r' + ' '*50)
-                    sys.stdout.write('\r{} {}/{} {}'.format(boards_played, i+1, nb_permutations, ' vs. '.join(permuted_combatants)))
+                    sys.stdout.write('\r' + ' '*line_len + ' '*len('^C'))
+                    line = '\r{} {}/{} {}'.format(boards_played, i+1, nb_permutations, ' vs. '.join(permuted_combatants))
+                    line_len = len(line)
+                    sys.stdout.write(line)
                     game_summary = run_ai_only_game(
                         args.port, args.address, procs, permuted_combatants,
                         board_definition,
@@ -102,6 +105,7 @@ def main():
             p.kill()
 
     if args.report:
+        sys.stdout.write('\r' + ' '*line_len + ' '*len('^C'))
         sys.stdout.write('\r')
 
     performances = [PlayerPerformance(player, games) for player, games in players_info.items()]
