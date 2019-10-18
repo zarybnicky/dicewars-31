@@ -6,6 +6,7 @@ import math
 import itertools
 from utils import run_ai_only_game, get_nickname, BoardDefinition, SingleLineReporter
 import random
+import pickle
 
 
 parser = ArgumentParser(prog='Dice_Wars')
@@ -17,6 +18,8 @@ parser.add_argument('-g', '--game-size', help="How many players should play a ga
 parser.add_argument('-s', '--seed', help="Seed sampling players for a game", type=int)
 parser.add_argument('-l', '--logdir', help="Folder to store last running logs in.")
 parser.add_argument('-r', '--report', help="State the game number on the stdout", action='store_true')
+parser.add_argument('--save', help="Where to put pickled GameSummaries")
+parser.add_argument('--load', help="Which GameSummaries to start from")
 
 procs = []
 
@@ -74,7 +77,12 @@ def main():
 
     signal(SIGCHLD, signal_handler)
 
-    all_games = []
+    if args.load:
+        with open(args.load, 'rb') as f:
+            all_games = pickle.load(f)
+    else:
+        all_games = []
+
     boards_played = 0
     reporter = SingleLineReporter(not args.report)
     try:
@@ -100,6 +108,10 @@ def main():
             p.kill()
 
     reporter.clean()
+
+    if args.save:
+        with open(args.save, 'wb') as f:
+            pickle.dump(all_games, f)
 
     for game in all_games:
         participants = game.participants()
