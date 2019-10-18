@@ -3,6 +3,8 @@ import sys
 from signal import signal, SIGCHLD
 from argparse import ArgumentParser
 
+import math
+import itertools
 from utils import run_ai_only_game, get_nickname, BoardDefinition
 import random
 
@@ -74,23 +76,25 @@ def main():
         games_played += 1
 
         combatants = get_combatants(2, players_info)
-        if args.report:
-            sys.stdout.write('\r' + ' '*50)
-            sys.stdout.write('\r{} {}'.format(games_played, ' vs. '.join(combatants)))
-        try:
-            game_summary = run_ai_only_game(
-                args.port, args.address, procs, combatants,
-                board_definition,
-                fixed=UNIVERSAL_SEED,
-                client_seed=UNIVERSAL_SEED,
-                logdir=args.logdir,
-            )
-            for player in combatants:
-                players_info[player].append(game_summary)
-        except KeyboardInterrupt:
-            for p in procs:
-                p.kill()
-            break
+        nb_permutations = math.factorial(len(combatants))
+        for i, permuted_combatants in enumerate(itertools.permutations(combatants)):
+            if args.report:
+                sys.stdout.write('\r' + ' '*50)
+                sys.stdout.write('\r{} {}/{} {}'.format(games_played, i+1, nb_permutations, ' vs. '.join(permuted_combatants)))
+            try:
+                game_summary = run_ai_only_game(
+                    args.port, args.address, procs, permuted_combatants,
+                    board_definition,
+                    fixed=UNIVERSAL_SEED,
+                    client_seed=UNIVERSAL_SEED,
+                    logdir=args.logdir,
+                )
+                for player in permuted_combatants:
+                    players_info[player].append(game_summary)
+            except KeyboardInterrupt:
+                for p in procs:
+                    p.kill()
+                break
 
     if args.report:
         sys.stdout.write('\r')
