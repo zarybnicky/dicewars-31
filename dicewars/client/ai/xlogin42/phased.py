@@ -2,6 +2,7 @@ import random
 
 from ..ai_base import GenericAI
 from ..utils import possible_attacks
+from .utils import attacker_advantage
 
 
 class FinalAI(GenericAI):
@@ -74,7 +75,3 @@ class FinalAI(GenericAI):
             return True
         else:
             return False
-
-
-def attacker_advantage(attacker, defender):
-    return attacker.get_dice() - defender.get_dice()
