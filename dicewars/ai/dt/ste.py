@@ -11,7 +11,7 @@ class AI:
     This agent makes such moves that have a probability of successful
     attack and hold over the area until next turn higher than 20 %.
     """
-    def __init__(self, player_name, board):
+    def __init__(self, player_name, board, players_order):
         """
         Parameters
         ----------

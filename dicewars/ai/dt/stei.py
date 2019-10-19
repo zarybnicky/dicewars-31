@@ -13,7 +13,7 @@ class AI:
     gams and higher than 40% in four-player games. In addition, it prefers
     attacks initiated from its largest region.
     """
-    def __init__(self, player_name, board):
+    def __init__(self, player_name, board, players_order):
         """
         Parameters
         ----------

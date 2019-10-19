@@ -1,13 +1,13 @@
 import numpy
+import logging
 
-from ..ai_base import GenericAI
 from ..utils import probability_of_successful_attack, sigmoid
 from ..utils import possible_attacks
 
 from dicewars.ai.ai_base import BattleCommand, EndTurnCommand
 
 
-class AI(GenericAI):
+class AI:
     """Agent using Win Probability Maximization (WPM) using logarithms of player dice
 
     This agent estimates win probability given the current state of the game.
@@ -15,7 +15,7 @@ class AI(GenericAI):
     is used. The agent choses such moves, that will have the highest improvement
     in the estimated probability.
     """
-    def __init__(self, game):
+    def __init__(self, player_name, board, players_order):
         """
         Parameters
         ----------
@@ -30,11 +30,13 @@ class AI(GenericAI):
         largest_region: list of int
             Names of areas in the largest region
         """
-        super(AI, self).__init__(game)
-        self.players = len(self.game.players)
+        self.player_name = player_name
+        self.logger = logging.getLogger('AI')
+
+        self.players = board.nb_players_alive()
         self.largest_region = []
 
-        self.players_order = game.players_order
+        self.players_order = players_order
         while self.player_name != self.players_order[0]:
             self.players_order.append(self.players_order.pop(0))
 
@@ -49,13 +51,14 @@ class AI(GenericAI):
         }[self.players]
         numpy.warnings.filterwarnings('ignore')
 
-    def ai_turn(self):
+    def ai_turn(self, board, nb_moves_this_turn, nb_turns_this_game, previous_time_left):
         """AI agent's turn
 
         This agent estimates probability to win the game from the feature vector associated
         with the outcome of the move and chooses such that has highest improvement in the
         probability.
         """
+        self.board = board
         self.logger.debug("Looking for possible turns.")
         turns = self.possible_turns()
         if turns and turns[0][0] != 'end':
@@ -89,7 +92,7 @@ class AI(GenericAI):
 
         features = []
         for p in self.players_order:
-            dice = numpy.log(self.game.board.get_player_dice(p))
+            dice = numpy.log(self.board.get_player_dice(p))
             if numpy.isinf(dice):
                 dice = 0
             features.append(dice)
@@ -97,7 +100,7 @@ class AI(GenericAI):
         wp_start = numpy.log(sigmoid(numpy.dot(numpy.array(features), self.weights)))
 
         end_features = [d for d in features]
-        end_features[0] = numpy.log(self.game.board.get_player_dice(name) + self.get_score_by_player(name))
+        end_features[0] = numpy.log(self.board.get_player_dice(name) + self.get_score_by_player(name))
         if numpy.isinf(end_features[0]):
             end_features[0] = 0
         wp_end = numpy.log(sigmoid(numpy.dot(numpy.array(end_features), self.weights)))
@@ -120,7 +123,7 @@ class AI(GenericAI):
                         increase_score = True
                         break
 
-            a_dice = self.game.board.get_player_dice(name)
+            a_dice = self.board.get_player_dice(name)
             a_score = self.get_score_by_player(name)
             if increase_score:
                 a_score += 1
@@ -131,7 +134,7 @@ class AI(GenericAI):
                 "loss": a_dice + a_score - atk_power + 1,
             }
 
-            d_dice = self.game.board.get_player_dice(opponent_name)
+            d_dice = self.board.get_player_dice(opponent_name)
             def_dice = {
                 "loss": d_dice,
                 "win": d_dice - def_power,

@@ -45,7 +45,7 @@ class GenericAI(object):
         self.game = game
         self.board = game.board
         self.player_name = game.player_name
-        self.ai = ai_constructor(self.player_name, copy.deepcopy(self.board))
+        self.ai = ai_constructor(self.player_name, copy.deepcopy(self.board), copy.deepcopy(self.game.players_order))
         self.waitingForResponse = False
         self.moves_this_turn = 0
         self.turns_finished = 0

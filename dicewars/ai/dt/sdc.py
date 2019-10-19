@@ -10,7 +10,7 @@ class AI:
     This agent prefers moves with highest strength difference
     and doesn't make moves against areas with higher strength.
     """
-    def __init__(self, player_name, board):
+    def __init__(self, player_name, board, players_order):
         """
         Parameters
         ----------

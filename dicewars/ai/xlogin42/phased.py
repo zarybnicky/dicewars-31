@@ -13,7 +13,7 @@ class FinalAI:
     This agent performs all possible moves in random order
     """
 
-    def __init__(self, player_name, board):
+    def __init__(self, player_name, board, players_order):
         """
         Parameters
         ----------

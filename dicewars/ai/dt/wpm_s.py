@@ -1,13 +1,13 @@
 import numpy
+import logging
 
-from ..ai_base import GenericAI
 from ..utils import probability_of_successful_attack, sigmoid
 from ..utils import possible_attacks
 
 from dicewars.ai.ai_base import BattleCommand, EndTurnCommand
 
 
-class AI(GenericAI):
+class AI:
     """Agent using Win Probability Maximization (WPM) using player scores
 
     This agent estimates win probability given the current state of the game.
@@ -15,7 +15,7 @@ class AI(GenericAI):
     The agent choses such moves, that will have the highest improvement in
     the estimated probability.
     """
-    def __init__(self, game):
+    def __init__(self, player_name, board, players_order):
         """
         Parameters
         ----------
@@ -30,12 +30,13 @@ class AI(GenericAI):
         largest_region: list of int
             Names of areas in the largest region
         """
-        super(AI, self).__init__(game)
-        self.players = len(self.game.players)
+        self.player_name = player_name
+        self.logger = logging.getLogger('AI')
+        self.players = board.nb_players_alive()
 
         self.largest_region = []
 
-        self.players_order = game.players_order
+        self.players_order = players_order
         while self.player_name != self.players_order[0]:
             self.players_order.append(self.players_order.pop(0))
 
@@ -49,13 +50,14 @@ class AI(GenericAI):
             8: numpy.array([0.277179, -0.16852433, -0.18678373, -0.17492631, -0.17996621, -0.1790844, -0.16977776, -0.18876063]),
         }[self.players]
 
-    def ai_turn(self):
+    def ai_turn(self, board, nb_moves_this_turn, nb_turns_this_game, previous_time_left):
         """AI agent's turn
 
         This agent estimates probability to win the game from the feature vector associated
         with the outcome of the move and chooses such that has highest improvement in the
         probability.
         """
+        self.board = board
         self.logger.debug("Looking for possible turns.")
         turns = self.possible_turns()
 
