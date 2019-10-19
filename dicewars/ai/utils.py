@@ -163,7 +163,6 @@ def possible_attacks(board, player_name):
             continue
 
         neighbours = area.get_adjacent_areas()
-        shuffle(neighbours)
 
         for adj in neighbours:
             adjacent_area = board.get_area(adj)

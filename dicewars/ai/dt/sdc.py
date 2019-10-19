@@ -1,16 +1,16 @@
-from ..ai_base import GenericAI
+import logging
 from ..utils import possible_attacks
 
 from dicewars.ai.ai_base import BattleCommand, EndTurnCommand
 
 
-class AI(GenericAI):
+class AI:
     """Agent using Strength Difference Checking (SDC) strategy
 
     This agent prefers moves with highest strength difference
     and doesn't make moves against areas with higher strength.
     """
-    def __init__(self, game):
+    def __init__(self, player_name, board, players_order):
         """
         Parameters
         ----------
@@ -18,15 +18,12 @@ class AI(GenericAI):
 
         Attributes
         ----------
-        possible_attackers : list of int
             Areas that can make an attack
-        attacks_done : list of int
         """
-        super(AI, self).__init__(game)
-        self.possible_attackers = []
-        self.attacks_done = []
+        self.player_name = player_name
+        self.logger = logging.getLogger('AI')
 
-    def ai_turn(self):
+    def ai_turn(self, board, nb_moves_this_turn, nb_turns_this_game, previous_time_left):
         """AI agent's turn
 
         Creates a list with all possible moves along with associated strength
@@ -36,7 +33,7 @@ class AI(GenericAI):
         """
 
         attacks = []
-        for source, target in possible_attacks(self.board, self.player_name):
+        for source, target in possible_attacks(board, self.player_name):
             area_dice = source.get_dice()
             strength_difference = area_dice - target.get_dice()
             attack = [source.get_name(), target.get_name(), strength_difference]

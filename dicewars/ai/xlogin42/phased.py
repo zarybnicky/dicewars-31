@@ -1,44 +1,45 @@
+import logging
 import random
 
-from ..ai_base import GenericAI
 from ..utils import possible_attacks
 from .utils import best_sdc_attack, is_acceptable_sdc_attack
 
 from dicewars.ai.ai_base import BattleCommand, EndTurnCommand
 
 
-class FinalAI(GenericAI):
+class FinalAI:
     """Naive player agent
 
     This agent performs all possible moves in random order
     """
 
-    def __init__(self, game):
+    def __init__(self, player_name, board, players_order):
         """
         Parameters
         ----------
         game : Game
         """
-        super().__init__(game)
+        self.player_name = player_name
+        self.logger = logging.getLogger('AI')
 
-    def ai_turn(self):
+    def ai_turn(self, board, nb_moves_this_turn, nb_turns_this_game, previous_time_left):
         """AI agent's turn
 
         Get a random area. If it has a possible move, the agent will do it.
         If there are no more moves, the agent ends its turn.
         """
-        if self.turns_finished < 3:
+        if nb_turns_this_game < 3:
             self.logger.debug("Doing a random move")
             attack_filter = lambda x: x
             attack_selector = random.choice
             attack_acceptor = lambda x: True
         else:
             self.logger.debug("Doing a serious move")
-            attack_filter = lambda x: self.from_largest_region(x)
+            attack_filter = lambda x: self.from_largest_region(board, x)
             attack_selector = best_sdc_attack
             attack_acceptor = lambda x: is_acceptable_sdc_attack(x)
 
-        all_moves = list(possible_attacks(self.board, self.player_name))
+        all_moves = list(possible_attacks(board, self.player_name))
         if not all_moves:
             self.logger.debug("There are no moves possible at all")
             return EndTurnCommand()
@@ -56,8 +57,8 @@ class FinalAI(GenericAI):
             self.logger.debug("The move {} is not acceptable, ending turn".format(the_move))
             return EndTurnCommand()
 
-    def from_largest_region(self, attacks):
-        players_regions = self.board.get_players_regions(self.player_name)
+    def from_largest_region(self, board, attacks):
+        players_regions = board.get_players_regions(self.player_name)
         max_region_size = max(len(region) for region in players_regions)
         max_sized_regions = [region for region in players_regions if len(region) == max_region_size]
 

@@ -1,11 +1,11 @@
-from ..ai_base import GenericAI
+import logging
 from ..utils import probability_of_holding_area, probability_of_successful_attack
 from ..utils import possible_attacks
 
 from dicewars.ai.ai_base import BattleCommand, EndTurnCommand
 
 
-class AI(GenericAI):
+class AI:
     """Agent using improved Signle Turn Expectiminimax (STEi) strategy
 
     This agent makes such moves that have a probability of successful
@@ -13,7 +13,7 @@ class AI(GenericAI):
     gams and higher than 40% in four-player games. In addition, it prefers
     attacks initiated from its largest region.
     """
-    def __init__(self, game):
+    def __init__(self, player_name, board, players_order):
         """
         Parameters
         ----------
@@ -26,26 +26,28 @@ class AI(GenericAI):
         score_weight: float
             Preference of an attack from largest region over other attacks
         """
-        super(AI, self).__init__(game)
-        self.new_turn = False
-        self.players = len(self.game.players)
-        if self.players == 2:
+        self.player_name = player_name
+        self.logger = logging.getLogger('AI')
+
+        nb_players = board.nb_players_alive()
+        self.logger.info('Setting up for {}-player game'.format(nb_players))
+        if nb_players == 2:
             self.treshold = 0.2
             self.score_weight = 3
         else:
             self.treshold = 0.4
             self.score_weight = 2
-        self.attacked = False
 
         self.largest_region = []
 
-    def ai_turn(self):
+    def ai_turn(self, board, nb_moves_this_turn, nb_turns_this_game, previous_time_left):
         """AI agent's turn
 
         Agent gets a list preferred moves and makes such move that has the
         highest estimated hold probability, prefering moves initiated from within
         the largest region. If there is no such move, the agent ends it's turn.
         """
+        self.board = board
         self.logger.debug("Looking for possible turns.")
         self.get_largest_region()
         turns = self.possible_turns()
