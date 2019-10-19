@@ -1,25 +1,26 @@
-from ..ai_base import GenericAI
+import logging
 from ..utils import possible_attacks
 from ..utils import probability_of_holding_area, probability_of_successful_attack
 
 from dicewars.ai.ai_base import BattleCommand, EndTurnCommand
 
 
-class AI(GenericAI):
+class AI:
     """Agent using Single Turn Expectiminimax (STE) strategy
 
     This agent makes such moves that have a probability of successful
     attack and hold over the area until next turn higher than 20 %.
     """
-    def __init__(self, game):
+    def __init__(self, player_name, board):
         """
         Parameters
         ----------
         game : Game
         """
-        super(AI, self).__init__(game)
+        self.player_name = player_name
+        self.logger = logging.getLogger('AI')
 
-    def ai_turn(self):
+    def ai_turn(self, board, nb_moves_this_turn, nb_turns_this_game, previous_time_left):
         """AI agent's turn
 
         Agent gets a list preferred moves and makes such move that has the
@@ -27,6 +28,7 @@ class AI(GenericAI):
         ends it's turn.
         """
         self.logger.debug("Looking for possible turns.")
+        self.board = board
         turns = self.possible_turns()
 
         if turns:
