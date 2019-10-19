@@ -28,7 +28,7 @@ class EndTurnCommand:
 class GenericAI(object):
     """Basic AI agent implementation
     """
-    def __init__(self, game):
+    def __init__(self, game, ai_constructor):
         """
         Parameters
         ----------
@@ -44,6 +44,7 @@ class GenericAI(object):
         self.game = game
         self.board = game.board
         self.player_name = game.player_name
+        self.ai = ai_constructor(self.player_name, self.board)
         self.waitingForResponse = False
         self.moves_this_turn = 0
         self.turns_finished = 0
@@ -67,7 +68,12 @@ class GenericAI(object):
             if self.current_player_name == self.player_name and not self.waitingForResponse:
                 try:
                     signal.setitimer(signal.ITIMER_REAL, TIME_LIMIT, 0)
-                    command = self.ai_turn()
+                    command = self.ai.ai_turn(
+                        self.board,
+                        self.moves_this_turn,
+                        self.turns_finished,
+                        self.time_left_last_time,
+                    )
                     self.time_left_last_time, _ = signal.setitimer(signal.ITIMER_REAL, 0.0, 0)
                     self.process_command(command)
                 except TimeoutError:
@@ -77,11 +83,6 @@ class GenericAI(object):
                 if not self.waitingForResponse:
                     self.logger.warning("Forced 'end_turn' because the implementation did nothing")
                     self.send_message('end_turn')
-
-    def ai_turn(self):
-        """Actual agent behaviour
-        """
-        return True
 
     def handle_server_message(self, msg):
         """Process message from the server
