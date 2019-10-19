@@ -1,3 +1,4 @@
+import copy
 import json
 from json.decoder import JSONDecodeError
 import logging
@@ -44,7 +45,7 @@ class GenericAI(object):
         self.game = game
         self.board = game.board
         self.player_name = game.player_name
-        self.ai = ai_constructor(self.player_name, self.board)
+        self.ai = ai_constructor(self.player_name, copy.deepcopy(self.board))
         self.waitingForResponse = False
         self.moves_this_turn = 0
         self.turns_finished = 0
@@ -69,7 +70,7 @@ class GenericAI(object):
                 try:
                     signal.setitimer(signal.ITIMER_REAL, TIME_LIMIT, 0)
                     command = self.ai.ai_turn(
-                        self.board,
+                        copy.deepcopy(self.board),
                         self.moves_this_turn,
                         self.turns_finished,
                         self.time_left_last_time,
