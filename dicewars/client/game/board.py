@@ -87,3 +87,6 @@ class Board(object):
                 return True
 
         return False
+
+    def nb_players_alive(self):
+        return len(set(area.get_owner_name() for area in self.areas.values()))
