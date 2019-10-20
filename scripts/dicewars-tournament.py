@@ -48,7 +48,7 @@ PLAYING_AIs = [
 ]
 UNIVERSAL_SEED = 42
 
-players_info = {ai: [] for ai in PLAYING_AIs}
+players_info = {ai: {'games': []} for ai in PLAYING_AIs}
 
 
 def get_combatants(nb_players, tournament_summary):
@@ -124,9 +124,9 @@ def main():
         participants = game.participants()
         for player in players_info:
             if get_nickname(player) in participants:
-                players_info[player].append(game)
+                players_info[player]['games'].append(game)
 
-    performances = [PlayerPerformance(player, games) for player, games in players_info.items()]
+    performances = [PlayerPerformance(player, info['games']) for player, info in players_info.items()]
     performances.sort(key=lambda perf: perf.winrate, reverse=True)
 
     for perf in performances:
