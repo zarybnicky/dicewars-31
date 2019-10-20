@@ -48,11 +48,20 @@ PLAYING_AIs = [
 ]
 UNIVERSAL_SEED = 42
 
-players_info = {ai: {'games': []} for ai in PLAYING_AIs}
+players_info = {ai: {'games': [], 'nb_games': 0} for ai in PLAYING_AIs}
 
 
-def get_combatants(nb_players, tournament_summary):
+def get_combatants_random(nb_players, tournament_summary):
     return random.sample(list(tournament_summary.keys()), nb_players)
+
+
+def get_combatants_equalizing(nb_players, tournament_summary):
+    all_possible = list(tournament_summary.keys())
+    random.shuffle(all_possible)
+    return sorted(all_possible, key=lambda p: tournament_summary[p]['nb_games'])[:nb_players]
+
+
+get_combatants = get_combatants_equalizing
 
 
 class PlayerPerformance:
@@ -100,6 +109,8 @@ def main():
             combatants = get_combatants(args.game_size, players_info)
             nb_permutations = math.factorial(len(combatants))
             for i, permuted_combatants in enumerate(itertools.permutations(combatants)):
+                for p in combatants:
+                    players_info[p]['nb_games'] += 1
                 reporter.report('\r{} {}/{} {}'.format(boards_played, i+1, nb_permutations, ' vs. '.join(permuted_combatants)))
                 game_summary = run_ai_only_game(
                     args.port, args.address, procs, permuted_combatants,
