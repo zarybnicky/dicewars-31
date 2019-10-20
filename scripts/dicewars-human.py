@@ -36,21 +36,17 @@ def main():
         # runs a four-player game with AIs 4, 2, and 1
     """
     args = parser.parse_args()
-    ai_versions = [1] * (args.number_of_players - 1)
 
     signal(SIGCHLD, signal_handler)
 
-    if args.ai:
-        if len(args.ai) + 1 > args.number_of_players:
-            print("Too many AI versions.")
-            exit(1)
-        for i in range(0, len(args.ai)):
-            ai_versions[i] = args.ai[i]
+    if len(args.ai) > 7:
+        print("Only games of up to 7 AI players are supported")
+        exit(1)
 
     try:
         cmd = [
             "./scripts/server.py",
-            "-n", str(args.number_of_players),
+            "-n", str(len(args.ai) + 1),
             "-p", str(args.port),
             "-a", str(args.address),
             '--debug', 'DEBUG',
@@ -64,23 +60,22 @@ def main():
 
         procs.append(Popen(cmd, stderr=open('server.log', 'w')))
 
-        for i in range(1, args.number_of_players + 1):
-            if i == 1:
-                cmd = [
-                    "./scripts/client.py",
-                    "-p", str(args.port),
-                    "-a", str(args.address),
-                ]
-            else:
-                cmd = [
-                    "./scripts/client.py",
-                    "-p", str(args.port),
-                    "-a", str(args.address),
-                    "--ai", str(ai_versions[i - 2]),
-                ]
+        cmd = [
+            "./scripts/client.py",
+            "-p", str(args.port),
+            "-a", str(args.address),
+        ]
+        procs.append(Popen(cmd))
+
+        for ai in args.ai:
+            cmd = [
+                "./scripts/client.py",
+                "-p", str(args.port),
+                "-a", str(args.address),
+                "--ai", ai,
+            ]
 
             procs.append(Popen(cmd))
-            sleep(0.1)
 
         for p in procs:
             p.wait()
