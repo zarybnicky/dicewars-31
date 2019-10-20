@@ -4,7 +4,7 @@ from signal import signal, SIGCHLD
 from argparse import ArgumentParser
 
 from dicewars.server.game.summary import get_win_rates
-from utils import run_ai_only_game, ListStats
+from utils import run_ai_only_game, ListStats, BoardDefinition
 
 
 parser = ArgumentParser(prog='Dice_Wars')
@@ -55,11 +55,10 @@ def main():
             sys.stdout.write('\r{}'.format(i))
         try:
             board_seed = None if args.board is None else args.board + i
+            board_definition = BoardDefinition(board_seed, args.ownership, args.strength)
             game_summary = run_ai_only_game(
                 args.port, args.address, procs, args.ai,
-                board=board_seed,
-                ownership=args.ownership,
-                strength=args.strength,
+                board_definition,
                 fixed=args.fixed,
                 client_seed=args.client_seed,
                 logdir=args.logdir,
