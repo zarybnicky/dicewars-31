@@ -1,5 +1,3 @@
-import logging
-
 from .area import Area
 
 
@@ -15,7 +13,6 @@ class Board(object):
         board : dict
             Dictionary describing the game's board
         """
-        self.logger = logging.getLogger('CLIENT')
         self.areas = {}
         for area in areas:
             self.areas[area] = Area(area, areas[area]['owner'], areas[area]['dice'],

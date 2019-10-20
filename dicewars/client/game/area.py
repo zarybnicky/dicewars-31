@@ -1,5 +1,4 @@
 import hexutil
-import logging
 
 
 class Area(object):
@@ -16,8 +15,6 @@ class Area(object):
         hexes : list of list of int
             Hex coordinates of for all Area's hexes
         """
-        self.logger = logging.getLogger('CLIENT')
-
         self.name = int(name)
         self.owner_name = int(owner)
         self.dice = int(dice)
@@ -52,9 +49,10 @@ class Area(object):
     def set_dice(self, dice):
         """Set area's dice
         """
-        self.dice = dice
         if dice < 1 or dice > 8:
-            self.logger.error("Area {0} dice set to {1}.".format(self.name, dice))
+            raise ValueError("Attempted to assign {} dice to Area {}".format(dice, self.name))
+
+        self.dice = dice
 
     def set_owner(self, name):
         """Set owner name
