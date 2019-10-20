@@ -7,7 +7,8 @@ and strength. The objective of the game is to conquer all territories and thus e
 This is a client-server implementation that was created as a part of a [bachelor's thesis at FIT BUT](https://www.vutbr.cz/www_base/zav_prace_soubor_verejne.php?file_id=180901)
 where it is described in more detail.
 
-## Usage
+
+## Installation
 
 To use this, you need to have python3 and the following python packages:
 
@@ -15,50 +16,77 @@ To use this, you need to have python3 and the following python packages:
     numpy
     pyqt
 
-To play the game, use the ``dicewars.py`` script with the following options:
+A standard ``requirements.txt`` is provided.
 
-    -n    number of players, could be 2-8 with 2 being the default value
+Furthermore, the root of the repository needs to be in ``PYTHONPATH``.
+
+## Running the game
+
+There are three different scripts prepared, which allow for testing different scenarios.
+However, they all expose a common set of parameters for controlling the pseudo-randomness in the game:
+
+    -b  geometry of the board
+    -o  clustering of areas into possesion of individual players  
+    -s  assignment of dice to areas
+
+When not set, the source of pseudo-random numbers is seeded from current time, becoming effectively random.
+
+Additionally, client-server communication can be controlled by:
+
     -p    port, default 5005
     -a    address, default is localhost
-    --ai  list of ai versions to play against (possible values 1-4, default 1)
 
-Example:
+Finally, individual AIs are refered to as follows:
+For every ``module`` in ``dicewars.ai``, which contains a class ``AI``, the ``AI`` is identified by ``module``. Examples are fiven throughout the following sections.
 
-    ./dicewars.py -n 4 --ai 4 2 1  # run a 4-player game against ai versions 4, 2 and 1
+### Playing with human
+Starts a human-controlled client along those driven by AIs.
 
-## List of AI players
-#### Naive (AI 1)
-This agent performs all possible moves in random order
+    ./scripts/dicewars-human.py --ai dt.stei dt.rand xlogin42
 
-#### Strength Difference Checking (AI 2)
-This agent prefers moves with highest strength difference 
-and doesn't make moves against areas with higher strength.
+### Playing with fixed AI order
+Starts a human-controlled client along those driven by AIs.
 
-#### Single Turn Expectiminimax (AI 3)
-This agent makes such moves that have a probability of successful
-attack and hold over the area until next turn higher than 20 %.
+    TODO
 
-#### Improved Single Turn Expectiminimax (AI 4)
-This agent makes such moves that have a probability of successful
-attack and hold over the area until next turn higher a 20% in two-player
-games and higher than 40% in four-player games. In addition, it prefers 
-attacks initiated from its largest region.
+### Running a tournament
+Keeps picking a subset of AIs of specified size and has them play together.
+The total set of AIs considered is given in the script itself.
+Additionally exposes these options:
 
-#### Win Probability Maximization using Scores (AI 5)
-This agent estimates win probability given the current state of the game.
-As a feature to describe the state, a vector of players' scores is used.
-The agent choses such moves, that will have the highest improvement in
-the estimated probability.
+    -n      number of board to be played
+    -g      size of games in number of players
+    -l      folder where to put logs of last game
+    --save  where to save the resulting list of games
 
-#### Win Probability Maximization using Dice (AI 6)
-This agent estimates win probability given the current state of the game.
-As a feature to describe the state, a vector of logarithms of players' scores
-is used. The agent choses such moves, that will have the highest improvement
-in the estimated probability.
+For every board, all permutations of player order are played, thus the total number of games equals ``N x G!``
 
-#### Win Probability Maximization using Scores and Dice (AI 7)
-This agent estimates win probability given the current state of the game.
-As a feature to describe the state, a vector of logarithms of players' dice
-and scores is used. The agent choses such moves, that will have the highest
-improvement in the estimated probability.
+## Implementing AIs
+See ``dicewars/ai/template.py`` and other existing AIs in the package.
+An AI is a class implementing two standard functions: ``__init__()`` and ``ai_turn()``
 
+### Name vs. instance
+Players and areas exist primary as instances of Player and Area.
+However -- originally for serialization purposes -- they are both referred to by their "name".
+These names are instances of `int`.
+Board can return Areas as given by name` every Area kwons its name.
+
+There is no reason for an AI to access instances of Player.
+
+## AI interface
+
+The constructor is expected to takes following parameters:
+
+    player_name     the name of the player this AI will control
+    board           an instance of ``dicewars.client.game.Board``
+    players_order   in what order do players take turns
+
+The turn making method is expected to takes following parameters:
+
+    board               an instance of ``dicewars.client.game.Board``   
+    nb_moves_this_turn  number of attacks made in this turn
+    nb_turns_this_game  number of turns ended so far
+    previous_time_left  time (in seconds) left after last decision making
+
+
+Multi-module implementation is possible, see ``xlogin42``
