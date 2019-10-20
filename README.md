@@ -45,9 +45,17 @@ Starts a human-controlled client along those driven by AIs.
     ./scripts/dicewars-human.py --ai dt.stei dt.rand xlogin42
 
 ### Playing with fixed AI order
-Starts a human-controlled client along those driven by AIs.
+Starts a set of games between AIs in given order.
+Increments the board seed with every game.
+Additionally exposes these options:
 
-    TODO
+    -n      number of board to be played
+    -l      folder where to put logs of last game
+    -r      keep reporting which game is being played
+
+An example:
+
+    ./scripts/dicewars-ai-only.py -r -b 11 -o 22 -s 33 -c 44 -n 10 -l ../logs --ai dt.stei xlogin42
 
 ### Running a tournament
 Keeps picking a subset of AIs of specified size and has them play together.
@@ -57,6 +65,7 @@ Additionally exposes these options:
     -n      number of board to be played
     -g      size of games in number of players
     -l      folder where to put logs of last game
+    -r      keep reporting what game is being played
     --save  where to save the resulting list of games
 
 For every board, all permutations of player order are played, thus the total number of games equals ``N x G!``
