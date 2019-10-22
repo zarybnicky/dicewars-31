@@ -3,6 +3,7 @@ from signal import signal, SIGCHLD
 from argparse import ArgumentParser
 
 import math
+import numpy as np
 import itertools
 from utils import run_ai_only_game, get_nickname, BoardDefinition, SingleLineReporter
 import random
@@ -51,17 +52,28 @@ UNIVERSAL_SEED = 42
 players_info = {ai: {'games': [], 'nb_games': 0} for ai in PLAYING_AIs}
 
 
-def get_combatants_random(nb_players, tournament_summary):
-    return random.sample(list(tournament_summary.keys()), nb_players)
+class CombatantsProvider:
+    def __init__(self, players):
+        self.game_numbers = np.zeros((len(players), len(players)), dtype=np.int)
+        self.players = players
+
+    def get_combatants_equalizing(self, nb_combatants):
+        per_player_count = {ai: nb_games for ai, nb_games in zip(self.players, np.sum(self.game_numbers, axis=1))}
+        pivot = np.argmin(per_player_count)
+        possible_competitors = [ai for ai in self.players if ai != pivot]
+        competitors = sorted(possible_competitors, key=lambda p: per_player_count[p])[:nb_combatants]
+
+        for player_a in competitors:
+            a_ind = self.players.index(player_a)
+            for player_b in competitors:
+                b_ind = self.players.index(player_b)
+                self.game_numbers[a_ind][b_ind] += nb_combatants
+
+        return competitors
 
 
-def get_combatants_equalizing(nb_players, tournament_summary):
-    all_possible = list(tournament_summary.keys())
-    random.shuffle(all_possible)
-    return sorted(all_possible, key=lambda p: tournament_summary[p]['nb_games'])[:nb_players]
-
-
-get_combatants = get_combatants_equalizing
+provider = CombatantsProvider(PLAYING_AIs)
+get_combatants = provider.get_combatants_equalizing
 
 
 class PlayerPerformance:
@@ -115,7 +127,7 @@ def main():
                 break
             boards_played += 1
 
-            combatants = get_combatants(args.game_size, players_info)
+            combatants = get_combatants(args.game_size)
             nb_permutations = math.factorial(len(combatants))
             for i, permuted_combatants in enumerate(itertools.permutations(combatants)):
                 for p in combatants:
