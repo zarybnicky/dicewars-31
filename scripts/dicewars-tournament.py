@@ -75,8 +75,17 @@ class PlayerPerformance:
             self.winrate = float('nan')
         self.name = name
 
+        self.per_competitor_winrate = {}
+        for competitor in PLAYING_AIs:
+            his_games = [game for game in games if get_nickname(competitor) in game.participants()]
+            self.per_competitor_winrate[competitor] = (sum(game.winner == nickname for game in his_games), len(his_games))
+
     def __str__(self):
-        return '{} {:.2f} % winrate [ {} / {} ]'.format(self.name, 100.0*self.winrate, self.nb_wins, self.nb_games)
+        per_competitor_str = ', '.join('{}/{}'.format(winrate[0], winrate[1]) for ai, winrate in self.per_competitor_winrate.items())
+        return '{} {:.2f} % winrate [ {} / {} ] {}'.format(self.name, 100.0*self.winrate, self.nb_wins, self.nb_games, per_competitor_str)
+
+    def competitors_header(self):
+        return '{} {} % winrate [ {} / {} ] {}'.format('.', '.', '.', '.', ' '.join(str(ai) for ai in PLAYING_AIs))
 
 
 def board_definitions(initial_board_seed):
@@ -140,6 +149,7 @@ def main():
     performances = [PlayerPerformance(player, info['games']) for player, info in players_info.items()]
     performances.sort(key=lambda perf: perf.winrate, reverse=True)
 
+    print(performances[0].competitors_header())
     for perf in performances:
         print(perf)
 
