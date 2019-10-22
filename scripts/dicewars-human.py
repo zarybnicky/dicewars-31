@@ -14,6 +14,7 @@ parser.add_argument('-o', '--ownership', help="Seed for province assignment", ty
 parser.add_argument('-p', '--port', help="Server port", type=int, default=5005)
 parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1')
 parser.add_argument('-l', '--logdir', help="Folder to store last running logs in.")
+parser.add_argument('-d', '--debug', action='store_true')
 parser.add_argument('--ai', help="Specify AI versions as a sequence of ints.", nargs='+')
 
 procs = []
@@ -51,7 +52,6 @@ def main():
             "-n", str(len(args.ai) + 1),
             "-p", str(args.port),
             "-a", str(args.address),
-            '--debug', 'DEBUG',
         ]
         if args.board is not None:
             cmd.extend(['-b', str(args.board)])
@@ -59,6 +59,8 @@ def main():
             cmd.extend(['-o', str(args.ownership)])
         if args.strength is not None:
             cmd.extend(['-s', str(args.strength)])
+        if args.debug:
+            cmd.extend(['--debug', 'DEBUG'])
 
         procs.append(Popen(cmd, stderr=log_file_producer(args.logdir, 'server.log')))
 
@@ -75,8 +77,9 @@ def main():
                 "-p", str(args.port),
                 "-a", str(args.address),
                 "--ai", ai,
-                '--debug', 'DEBUG',
             ]
+            if args.debug:
+                cmd.extend(['--debug', 'DEBUG'])
 
             procs.append(Popen(cmd, stderr=log_file_producer(args.logdir, 'client-{}.log'.format(ai))))
 

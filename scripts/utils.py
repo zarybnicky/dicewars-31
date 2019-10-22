@@ -61,7 +61,10 @@ def log_file_producer(logdir, process):
         return open('{}/{}'.format(logdir, process), 'w')
 
 
-def run_ai_only_game(port, address, process_list, ais, board_definition=None, fixed=None, client_seed=None, logdir=None):
+def run_ai_only_game(
+        port, address, process_list, ais,
+        board_definition=None, fixed=None, client_seed=None,
+        logdir=None, debug=False):
     logs = []
     process_list.clear()
 
@@ -72,7 +75,6 @@ def run_ai_only_game(port, address, process_list, ais, board_definition=None, fi
         "-n", str(len(ais)),
         "-p", str(port),
         "-a", str(address),
-        '--debug', 'DEBUG',
     ]
     server_cmd.append('-r')
     server_cmd.extend(ai_nicks)
@@ -80,6 +82,8 @@ def run_ai_only_game(port, address, process_list, ais, board_definition=None, fi
         server_cmd.extend(board_definition.to_args())
     if fixed is not None:
         server_cmd.extend(['-f', str(fixed)])
+    if debug:
+        server_cmd.extend(['--debug', 'DEBUG'])
 
     server_output = tempfile.TemporaryFile('w+')
     logs.append(log_file_producer(logdir, 'server.txt'))
@@ -91,10 +95,11 @@ def run_ai_only_game(port, address, process_list, ais, board_definition=None, fi
             "-p", str(port),
             "-a", str(address),
             "--ai", str(ai_version),
-            '--debug', 'DEBUG',
         ]
         if client_seed is not None:
             client_cmd.extend(['-s', str(client_seed)])
+        if debug:
+            client_cmd.extend(['--debug', 'DEBUG'])
 
         logs.append(log_file_producer(logdir, 'client-{}.log'.format(ai_version)))
         process_list.append(Popen(client_cmd, stderr=logs[-1]))
