@@ -69,7 +69,9 @@ def main():
             "-p", str(args.port),
             "-a", str(args.address),
         ]
-        procs.append(Popen(cmd))
+        if args.debug:
+            cmd.extend(['--debug', 'DEBUG'])
+        procs.append(Popen(cmd, stderr=log_file_producer(args.logdir, 'client-human.log')))
 
         for ai in args.ai:
             cmd = [
