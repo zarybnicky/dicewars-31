@@ -17,6 +17,7 @@ parser.add_argument('-n', '--nb-boards', help="How many boards should be played"
 parser.add_argument('-g', '--game-size', help="How many players should play a game", type=int, required=True)
 parser.add_argument('-s', '--seed', help="Seed sampling players for a game", type=int)
 parser.add_argument('-l', '--logdir', help="Folder to store last running logs in.")
+parser.add_argument('-d', '--debug', action='store_true')
 parser.add_argument('-r', '--report', help="State the game number on the stdout", action='store_true')
 parser.add_argument('--save', help="Where to put pickled GameSummaries")
 parser.add_argument('--load', help="Which GameSummaries to start from")
@@ -106,6 +107,7 @@ def main():
                     fixed=UNIVERSAL_SEED,
                     client_seed=UNIVERSAL_SEED,
                     logdir=args.logdir,
+                    debug=args.debug,
                 )
                 all_games.append(game_summary)
     except KeyboardInterrupt:

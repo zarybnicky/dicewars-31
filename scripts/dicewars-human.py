@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 from signal import signal, SIGCHLD
 from subprocess import Popen
-from time import sleep
 from argparse import ArgumentParser
+
+from utils import log_file_producer
 
 
 parser = ArgumentParser(prog='Dice_Wars')
@@ -12,6 +13,8 @@ parser.add_argument('-s', '--strength', help="Seed for dice assignment", type=in
 parser.add_argument('-o', '--ownership', help="Seed for province assignment", type=int)
 parser.add_argument('-p', '--port', help="Server port", type=int, default=5005)
 parser.add_argument('-a', '--address', help="Server address", default='127.0.0.1')
+parser.add_argument('-l', '--logdir', help="Folder to store last running logs in.")
+parser.add_argument('-d', '--debug', action='store_true')
 parser.add_argument('--ai', help="Specify AI versions as a sequence of ints.", nargs='+')
 
 procs = []
@@ -49,7 +52,6 @@ def main():
             "-n", str(len(args.ai) + 1),
             "-p", str(args.port),
             "-a", str(args.address),
-            '--debug', 'DEBUG',
         ]
         if args.board is not None:
             cmd.extend(['-b', str(args.board)])
@@ -57,15 +59,19 @@ def main():
             cmd.extend(['-o', str(args.ownership)])
         if args.strength is not None:
             cmd.extend(['-s', str(args.strength)])
+        if args.debug:
+            cmd.extend(['--debug', 'DEBUG'])
 
-        procs.append(Popen(cmd, stderr=open('server.log', 'w')))
+        procs.append(Popen(cmd, stderr=log_file_producer(args.logdir, 'server.log')))
 
         cmd = [
             "./scripts/client.py",
             "-p", str(args.port),
             "-a", str(args.address),
         ]
-        procs.append(Popen(cmd))
+        if args.debug:
+            cmd.extend(['--debug', 'DEBUG'])
+        procs.append(Popen(cmd, stderr=log_file_producer(args.logdir, 'client-human.log')))
 
         for ai in args.ai:
             cmd = [
@@ -74,8 +80,10 @@ def main():
                 "-a", str(args.address),
                 "--ai", ai,
             ]
+            if args.debug:
+                cmd.extend(['--debug', 'DEBUG'])
 
-            procs.append(Popen(cmd))
+            procs.append(Popen(cmd, stderr=log_file_producer(args.logdir, 'client-{}.log'.format(ai))))
 
         for p in procs:
             p.wait()

@@ -17,6 +17,7 @@ parser.add_argument('-o', '--ownership', help="Seed for province assignment", ty
 parser.add_argument('-f', '--fixed', help="Random seed to be used for player order and dice rolls", type=int)
 parser.add_argument('-c', '--client-seed', help="Seed for clients", type=int)
 parser.add_argument('-l', '--logdir', help="Folder to store last running logs in.")
+parser.add_argument('-d', '--debug', action='store_true')
 parser.add_argument('--ai', help="Specify AI versions as a sequence of ints.", nargs='+')
 parser.add_argument('-r', '--report', help="State the game number on the stdout", action='store_true')
 
@@ -62,6 +63,7 @@ def main():
                 fixed=args.fixed,
                 client_seed=args.client_seed,
                 logdir=args.logdir,
+                debug=args.debug,
             )
             summaries.append(game_summary)
         except KeyboardInterrupt:
