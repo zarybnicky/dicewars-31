@@ -49,7 +49,7 @@ PLAYING_AIs = [
 ]
 UNIVERSAL_SEED = 42
 
-players_info = {ai: {'games': [], 'nb_games': 0} for ai in PLAYING_AIs}
+players_info = {ai: {'games': []} for ai in PLAYING_AIs}
 
 
 class CombatantsProvider:
@@ -59,17 +59,18 @@ class CombatantsProvider:
 
     def get_combatants_equalizing(self, nb_combatants):
         per_player_count = {ai: nb_games for ai, nb_games in zip(self.players, np.sum(self.game_numbers, axis=1))}
-        pivot = np.argmin(per_player_count)
-        possible_competitors = [ai for ai in self.players if ai != pivot]
-        competitors = sorted(possible_competitors, key=lambda p: per_player_count[p])[:nb_combatants]
 
-        for player_a in competitors:
-            a_ind = self.players.index(player_a)
-            for player_b in competitors:
-                b_ind = self.players.index(player_b)
+        pivot_ind = self.players.index(sorted(per_player_count, key=lambda p: per_player_count[p])[0])
+        possible_competitors = [self.players.index(ai) for ai in self.players if self.players.index(ai) != pivot_ind]
+        competitors = sorted(possible_competitors, key=lambda p: (self.game_numbers[pivot_ind][p], per_player_count[self.players[p]]))[:nb_combatants-1]
+
+        players = [pivot_ind] + competitors
+
+        for a_ind in players:
+            for b_ind in players:
                 self.game_numbers[a_ind][b_ind] += nb_combatants
 
-        return competitors
+        return [self.players[p] for p in players]
 
 
 provider = CombatantsProvider(PLAYING_AIs)
@@ -130,8 +131,6 @@ def main():
             combatants = get_combatants(args.game_size)
             nb_permutations = math.factorial(len(combatants))
             for i, permuted_combatants in enumerate(itertools.permutations(combatants)):
-                for p in combatants:
-                    players_info[p]['nb_games'] += 1
                 reporter.report('\r{} {}/{} {}'.format(boards_played, i+1, nb_permutations, ' vs. '.join(permuted_combatants)))
                 game_summary = run_ai_only_game(
                     args.port, args.address, procs, permuted_combatants,
