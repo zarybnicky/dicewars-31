@@ -59,6 +59,13 @@ def board_definitions(initial_board_seed):
         board_seed += 1
 
 
+def full_permunations_generator(players):
+    nb_perms = math.factorial(len(players))
+    perms_generator = itertools.permutations(players)
+
+    return nb_perms, perms_generator
+
+
 def main():
     combatants_provider = CombatantsProvider(PLAYING_AIs)
     args = parser.parse_args()
@@ -81,8 +88,8 @@ def main():
             boards_played += 1
 
             combatants = combatants_provider.get_combatants(args.game_size)
-            nb_permutations = math.factorial(len(combatants))
-            for i, permuted_combatants in enumerate(itertools.permutations(combatants)):
+            nb_permutations, permutations_generator = full_permunations_generator(combatants)
+            for i, permuted_combatants in enumerate(permutations_generator):
                 reporter.report('\r{} {}/{} {}'.format(boards_played, i+1, nb_permutations, ' vs. '.join(permuted_combatants)))
                 game_summary = run_ai_only_game(
                     args.port, args.address, procs, permuted_combatants,
