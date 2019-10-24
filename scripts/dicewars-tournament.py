@@ -91,10 +91,13 @@ class PlayerPerformance:
         self.per_competitor_winrate = {}
         for competitor in PLAYING_AIs:
             his_games = [game for game in games if get_nickname(competitor) in game.participants()]
-            self.per_competitor_winrate[competitor] = (sum(game.winner == nickname for game in his_games), len(his_games))
+            if his_games:
+                self.per_competitor_winrate[competitor] = (sum(game.winner == nickname for game in his_games)/len(his_games), len(his_games))
+            else:
+                self.per_competitor_winrate[competitor] = (float('nan'), len(his_games))
 
     def __str__(self):
-        per_competitor_str = ', '.join('{}/{}'.format(winrate[0], winrate[1]) for ai, winrate in self.per_competitor_winrate.items())
+        per_competitor_str = ' '.join('{:.1f}/{}'.format(100.0*winrate[0], winrate[1]) for ai, winrate in self.per_competitor_winrate.items())
         return '{} {:.2f} % winrate [ {} / {} ] {}'.format(self.name, 100.0*self.winrate, self.nb_wins, self.nb_games, per_competitor_str)
 
     def competitors_header(self):
