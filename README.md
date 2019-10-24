@@ -97,5 +97,7 @@ The turn making method is expected to takes following parameters:
     nb_turns_this_game  number of turns ended so far
     previous_time_left  time (in seconds) left after last decision making
 
+The ``AI.ai_turn()`` is required to return an instance of ``BattleCommand`` or ``EndTurnCommand``.
 
-Multi-module implementation is possible, see ``xlogin42``
+Multi-module implementation is possible, see ``xlogin42`` for an example.
+
