@@ -3,6 +3,7 @@ import sys
 from subprocess import Popen
 import tempfile
 import numpy as np
+import random
 
 from dicewars.server.game.summary import GameSummary
 
@@ -183,15 +184,17 @@ class CombatantsProvider:
     def get_combatants(self, nb_combatants):
         per_player_count = {ai: nb_games for ai, nb_games in zip(self.players, np.sum(self.game_numbers, axis=1))}
 
-        pivot_ind = self.players.index(sorted(per_player_count, key=lambda p: per_player_count[p])[0])
-        possible_competitors = [self.players.index(ai) for ai in self.players if self.players.index(ai) != pivot_ind]
-        competitors = sorted(possible_competitors, key=lambda p: (self.game_numbers[pivot_ind][p], per_player_count[self.players[p]]))[:nb_combatants-1]
+        least_playing = sorted(per_player_count, key=lambda p: per_player_count[p])[:nb_combatants//2]
+        pivot_inds = [self.players.index(p) for p in least_playing]
+        possible_competitors = [self.players.index(ai) for ai in self.players if self.players.index(ai) not in pivot_inds]
+        random.shuffle(possible_competitors)
+        competitors = possible_competitors[:nb_combatants-len(pivot_inds)]
 
-        players = [pivot_ind] + competitors
+        players = pivot_inds + competitors
 
         for a_ind in players:
             for b_ind in players:
-                self.game_numbers[a_ind][b_ind] += nb_combatants
+                self.game_numbers[a_ind][b_ind] += 1
 
         return [self.players[p] for p in players]
 
