@@ -1,6 +1,6 @@
 import numpy
 from dicewars.client.game.board import Board
-from typing import List, Tuple
+from typing import Iterator, Tuple
 
 
 def sigmoid(a):
@@ -158,7 +158,7 @@ def attack_succcess_probability(atk, df):
     }[atk][df]
 
 
-def possible_attacks(board: Board, player_name: int) -> List[Tuple[int, int]]:
+def possible_attacks(board: Board, player_name: int) -> Iterator[Tuple[int, int]]:
     for area in board.get_player_border(player_name):
         if not area.can_attack():
             continue
