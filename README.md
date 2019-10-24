@@ -107,3 +107,5 @@ Instances of ``Area`` then allow inquiry through ``get_adjacent_areas()``, ``get
 
 It may also be practical to acquire all possible moves from ``dicewars.ai.utils.possible_attacks()``.
 This module also provides formulas for probability of conquering and holding an Area.
+
+The instance of ``Board`` passed to AI is a deepcopy, so the AI is free to mangle it in any way it deemed useful.
