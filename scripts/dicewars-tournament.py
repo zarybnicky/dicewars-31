@@ -4,7 +4,8 @@ from argparse import ArgumentParser
 
 import math
 import itertools
-from utils import run_ai_only_game, get_nickname, BoardDefinition, SingleLineReporter
+from utils import run_ai_only_game, get_nickname, BoardDefinition, SingleLineReporter, PlayerPerformance
+from utils import CombatantsProvider, column_t
 import random
 import pickle
 
@@ -48,26 +49,7 @@ PLAYING_AIs = [
 ]
 UNIVERSAL_SEED = 42
 
-players_info = {ai: [] for ai in PLAYING_AIs}
-
-
-def get_combatants(nb_players, tournament_summary):
-    return random.sample(list(tournament_summary.keys()), nb_players)
-
-
-class PlayerPerformance:
-    def __init__(self, name, games):
-        nickname = get_nickname(name)
-        self.nb_games = len(games)
-        self.nb_wins = sum(game.winner == nickname for game in games)
-        if self.nb_games > 0:
-            self.winrate = self.nb_wins/self.nb_games
-        else:
-            self.winrate = float('nan')
-        self.name = name
-
-    def __str__(self):
-        return '{} {:.2f} % winrate [ {} / {} ]'.format(self.name, 100.0*self.winrate, self.nb_wins, self.nb_games)
+players_info = {ai: {'games': []} for ai in PLAYING_AIs}
 
 
 def board_definitions(initial_board_seed):
@@ -77,7 +59,26 @@ def board_definitions(initial_board_seed):
         board_seed += 1
 
 
+def full_permunations_generator(players):
+    nb_perms = math.factorial(len(players))
+    perms_generator = itertools.permutations(players)
+
+    return nb_perms, perms_generator
+
+
+def rotational_permunations_generator(players):
+    def all_rotations(a_list):
+        for _ in range(len(a_list)):
+            head = a_list[0]
+            a_list = a_list[1:] + [head]
+            yield a_list
+
+    random.shuffle(players)
+    return len(players), all_rotations(players)
+
+
 def main():
+    combatants_provider = CombatantsProvider(PLAYING_AIs)
     args = parser.parse_args()
     random.seed(args.seed)
 
@@ -97,9 +98,9 @@ def main():
                 break
             boards_played += 1
 
-            combatants = get_combatants(args.game_size, players_info)
-            nb_permutations = math.factorial(len(combatants))
-            for i, permuted_combatants in enumerate(itertools.permutations(combatants)):
+            combatants = combatants_provider.get_combatants(args.game_size)
+            nb_permutations, permutations_generator = rotational_permunations_generator(combatants)
+            for i, permuted_combatants in enumerate(permutations_generator):
                 reporter.report('\r{} {}/{} {}'.format(boards_played, i+1, nb_permutations, ' vs. '.join(permuted_combatants)))
                 game_summary = run_ai_only_game(
                     args.port, args.address, procs, permuted_combatants,
@@ -124,13 +125,15 @@ def main():
         participants = game.participants()
         for player in players_info:
             if get_nickname(player) in participants:
-                players_info[player].append(game)
+                players_info[player]['games'].append(game)
 
-    performances = [PlayerPerformance(player, games) for player, games in players_info.items()]
+    performances = [PlayerPerformance(player, info['games'], PLAYING_AIs) for player, info in players_info.items()]
     performances.sort(key=lambda perf: perf.winrate, reverse=True)
 
-    for perf in performances:
-        print(perf)
+    perf_strings = [performances[0].competitors_header()] + [str(perf) for perf in performances]
+    fields = [perf.split() for perf in perf_strings]
+
+    print(column_t(fields))
 
 
 if __name__ == '__main__':

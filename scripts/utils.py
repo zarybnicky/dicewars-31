@@ -2,6 +2,8 @@ import os
 import sys
 from subprocess import Popen
 import tempfile
+import numpy as np
+import random
 
 from dicewars.server.game.summary import GameSummary
 
@@ -144,3 +146,71 @@ class SingleLineReporter:
         self.clean()
         self.last_line_len = len(line)
         sys.stdout.write(line)
+
+
+class PlayerPerformance:
+    def __init__(self, name, games, players):
+        nickname = get_nickname(name)
+        self.nb_games = len(games)
+        self.nb_wins = sum(game.winner == nickname for game in games)
+        self.players = players
+        if self.nb_games > 0:
+            self.winrate = self.nb_wins/self.nb_games
+        else:
+            self.winrate = float('nan')
+        self.name = name
+
+        self.per_competitor_winrate = {}
+        for competitor in self.players:
+            his_games = [game for game in games if get_nickname(competitor) in game.participants()]
+            if his_games:
+                self.per_competitor_winrate[competitor] = (sum(game.winner == nickname for game in his_games)/len(his_games), len(his_games))
+            else:
+                self.per_competitor_winrate[competitor] = (float('nan'), len(his_games))
+
+    def __str__(self):
+        per_competitor_str = ' '.join('{:.1f}/{}'.format(100.0*winrate[0], winrate[1]) for ai, winrate in self.per_competitor_winrate.items())
+        return '{} {:.2f} % winrate [ {} / {} ] {}'.format(self.name, 100.0*self.winrate, self.nb_wins, self.nb_games, per_competitor_str)
+
+    def competitors_header(self):
+        return '{} {} % winrate [ {} / {} ] {}'.format('.', '.', '.', '.', ' '.join(str(ai) for ai in self.players))
+
+
+class CombatantsProvider:
+    def __init__(self, players):
+        self.game_numbers = np.zeros((len(players), len(players)), dtype=np.int)
+        self.players = players
+
+    def get_combatants(self, nb_combatants):
+        per_player_count = {ai: nb_games for ai, nb_games in zip(self.players, np.sum(self.game_numbers, axis=1))}
+
+        least_playing = sorted(per_player_count, key=lambda p: per_player_count[p])[:nb_combatants//2]
+        pivot_inds = [self.players.index(p) for p in least_playing]
+        possible_competitors = [self.players.index(ai) for ai in self.players if self.players.index(ai) not in pivot_inds]
+        random.shuffle(possible_competitors)
+        competitors = possible_competitors[:nb_combatants-len(pivot_inds)]
+
+        players = pivot_inds + competitors
+
+        for a_ind in players:
+            for b_ind in players:
+                self.game_numbers[a_ind][b_ind] += 1
+
+        return [self.players[p] for p in players]
+
+
+def column_t(items):
+    for line in items:
+        assert(len(line) == len(items[0]))
+
+    col_widths = []
+    for col_id in range(len(items[0])):
+        col_widths.append(max(len(line[col_id]) for line in items))
+
+    formatted_lines = []
+    for line in items:
+        fmts = ['{{: <{}}}'.format(width) for width in col_widths]
+        line_fmt = '{}\n'.format(' '.join(fmts))
+        formatted_lines.append(line_fmt.format(*line))
+
+    return ''.join(formatted_lines)
