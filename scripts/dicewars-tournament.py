@@ -3,9 +3,9 @@ from signal import signal, SIGCHLD
 from argparse import ArgumentParser
 
 import math
-import numpy as np
 import itertools
-from utils import run_ai_only_game, get_nickname, BoardDefinition, SingleLineReporter
+from utils import run_ai_only_game, get_nickname, BoardDefinition, SingleLineReporter, PlayerPerformance
+from utils import CombatantsProvider
 import random
 import pickle
 
@@ -52,58 +52,6 @@ UNIVERSAL_SEED = 42
 players_info = {ai: {'games': []} for ai in PLAYING_AIs}
 
 
-class CombatantsProvider:
-    def __init__(self, players):
-        self.game_numbers = np.zeros((len(players), len(players)), dtype=np.int)
-        self.players = players
-
-    def get_combatants_equalizing(self, nb_combatants):
-        per_player_count = {ai: nb_games for ai, nb_games in zip(self.players, np.sum(self.game_numbers, axis=1))}
-
-        pivot_ind = self.players.index(sorted(per_player_count, key=lambda p: per_player_count[p])[0])
-        possible_competitors = [self.players.index(ai) for ai in self.players if self.players.index(ai) != pivot_ind]
-        competitors = sorted(possible_competitors, key=lambda p: (self.game_numbers[pivot_ind][p], per_player_count[self.players[p]]))[:nb_combatants-1]
-
-        players = [pivot_ind] + competitors
-
-        for a_ind in players:
-            for b_ind in players:
-                self.game_numbers[a_ind][b_ind] += nb_combatants
-
-        return [self.players[p] for p in players]
-
-
-provider = CombatantsProvider(PLAYING_AIs)
-get_combatants = provider.get_combatants_equalizing
-
-
-class PlayerPerformance:
-    def __init__(self, name, games):
-        nickname = get_nickname(name)
-        self.nb_games = len(games)
-        self.nb_wins = sum(game.winner == nickname for game in games)
-        if self.nb_games > 0:
-            self.winrate = self.nb_wins/self.nb_games
-        else:
-            self.winrate = float('nan')
-        self.name = name
-
-        self.per_competitor_winrate = {}
-        for competitor in PLAYING_AIs:
-            his_games = [game for game in games if get_nickname(competitor) in game.participants()]
-            if his_games:
-                self.per_competitor_winrate[competitor] = (sum(game.winner == nickname for game in his_games)/len(his_games), len(his_games))
-            else:
-                self.per_competitor_winrate[competitor] = (float('nan'), len(his_games))
-
-    def __str__(self):
-        per_competitor_str = ' '.join('{:.1f}/{}'.format(100.0*winrate[0], winrate[1]) for ai, winrate in self.per_competitor_winrate.items())
-        return '{} {:.2f} % winrate [ {} / {} ] {}'.format(self.name, 100.0*self.winrate, self.nb_wins, self.nb_games, per_competitor_str)
-
-    def competitors_header(self):
-        return '{} {} % winrate [ {} / {} ] {}'.format('.', '.', '.', '.', ' '.join(str(ai) for ai in PLAYING_AIs))
-
-
 def board_definitions(initial_board_seed):
     board_seed = initial_board_seed
     while True:
@@ -112,6 +60,7 @@ def board_definitions(initial_board_seed):
 
 
 def main():
+    combatants_provider = CombatantsProvider(PLAYING_AIs)
     args = parser.parse_args()
     random.seed(args.seed)
 
@@ -131,7 +80,7 @@ def main():
                 break
             boards_played += 1
 
-            combatants = get_combatants(args.game_size)
+            combatants = combatants_provider.get_combatants(args.game_size)
             nb_permutations = math.factorial(len(combatants))
             for i, permuted_combatants in enumerate(itertools.permutations(combatants)):
                 reporter.report('\r{} {}/{} {}'.format(boards_played, i+1, nb_permutations, ' vs. '.join(permuted_combatants)))
@@ -160,7 +109,7 @@ def main():
             if get_nickname(player) in participants:
                 players_info[player]['games'].append(game)
 
-    performances = [PlayerPerformance(player, info['games']) for player, info in players_info.items()]
+    performances = [PlayerPerformance(player, info['games'], PLAYING_AIs) for player, info in players_info.items()]
     performances.sort(key=lambda perf: perf.winrate, reverse=True)
 
     perf_strings = [performances[0].competitors_header()] + [str(perf) for perf in performances]
