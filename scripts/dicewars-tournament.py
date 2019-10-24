@@ -66,6 +66,17 @@ def full_permunations_generator(players):
     return nb_perms, perms_generator
 
 
+def rotational_permunations_generator(players):
+    def all_rotations(a_list):
+        for _ in range(len(a_list)):
+            head = a_list[0]
+            a_list = a_list[1:] + [head]
+            yield a_list
+
+    random.shuffle(players)
+    return len(players), all_rotations(players)
+
+
 def main():
     combatants_provider = CombatantsProvider(PLAYING_AIs)
     args = parser.parse_args()
@@ -88,7 +99,7 @@ def main():
             boards_played += 1
 
             combatants = combatants_provider.get_combatants(args.game_size)
-            nb_permutations, permutations_generator = full_permunations_generator(combatants)
+            nb_permutations, permutations_generator = rotational_permunations_generator(combatants)
             for i, permuted_combatants in enumerate(permutations_generator):
                 reporter.report('\r{} {}/{} {}'.format(boards_played, i+1, nb_permutations, ' vs. '.join(permuted_combatants)))
                 game_summary = run_ai_only_game(
