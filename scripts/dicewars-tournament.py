@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 import math
 import itertools
 from utils import run_ai_only_game, get_nickname, BoardDefinition, SingleLineReporter, PlayerPerformance
-from utils import CombatantsProvider
+from utils import CombatantsProvider, column_t
 import random
 import pickle
 
@@ -134,23 +134,6 @@ def main():
     fields = [perf.split() for perf in perf_strings]
 
     print(column_t(fields))
-
-
-def column_t(items):
-    for line in items:
-        assert(len(line) == len(items[0]))
-
-    col_widths = []
-    for col_id in range(len(items[0])):
-        col_widths.append(max(len(line[col_id]) for line in items))
-
-    formatted_lines = []
-    for line in items:
-        fmts = ['{{: <{}}}'.format(width) for width in col_widths]
-        line_fmt = '{}\n'.format(' '.join(fmts))
-        formatted_lines.append(line_fmt.format(*line))
-
-    return ''.join(formatted_lines)
 
 
 if __name__ == '__main__':
