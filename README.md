@@ -109,3 +109,9 @@ It may also be practical to acquire all possible moves from ``dicewars.ai.utils.
 This module also provides formulas for probability of conquering and holding an Area.
 
 The instance of ``Board`` passed to AI is a deepcopy, so the AI is free to mangle it in any way it deemed useful.
+
+## Dealing with misbehaving AIs
+
+* Slow AI -- AI taking longer than 1 sec to make a decision will be stopped in deciding and a ``EndTurnCommand`` will be sent instead. AIs are informed about their time consumption through ``previous_time_left``. 
+* Stupid AI -- AI attempting to make an illegal move will be terminated, contuming the game.
+* Passive AI -- AI sending only ``EndTurnCommand`` will be quickly taken care of by other players.
