@@ -70,9 +70,15 @@ Additionally exposes these options:
 
 For every board, all permutations of player order are played, thus the total number of games equals ``N x G!``
 
+An example:
+
+    ./scripts/dicewars-tournament.py -r -g 2 -n 50 -b 101 -s 1337 -l ../logs
+
+
 ## Implementing AIs
 See ``dicewars/ai/template.py`` and other existing AIs in the package.
 An AI is a class implementing two standard functions: ``__init__()`` and ``ai_turn()``
+
 
 ### Name vs. instance
 Players and areas exist primary as instances of Player and Area.
