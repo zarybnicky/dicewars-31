@@ -138,6 +138,7 @@ class GenericAI(object):
 
     def process_command(self, command):
         if isinstance(command, BattleCommand):
+            self.check_battle_valid(command)
             self.send_message('battle', command.source_name, command.target_name)
         elif isinstance(command, EndTurnCommand):
             self.send_message('end_turn')
@@ -176,3 +177,22 @@ class GenericAI(object):
         except BrokenPipeError:
             self.logger.error("Connection to server broken.")
             exit(1)
+
+    def check_battle_valid(self, battle):
+        source_area = self.board.get_area(battle.source_name)
+        source_owner = source_area.get_owner_name()
+
+        if source_owner != self.player_name:
+            raise RuntimeError('Player {} attempted to attack from area {} owned by {}.'.format(
+                self.player, battle.source_name, source_owner
+            ))
+
+        if not source_area.can_attack():
+            raise RuntimeError('Attempted to attack from area {} having {} dice.'.format(
+                battle.source_name, source_area.get_dice()
+            ))
+
+        if battle.target_name not in source_area.get_adjacent_areas():
+            raise RuntimeError('Attempted to attack from area {} area {} which is not adjacent.'.format(
+                battle.source_name, battle.target_name
+            ))
