@@ -36,7 +36,7 @@ Additionally, client-server communication can be controlled by:
     -a    address, default is localhost
 
 Finally, individual AIs are refered to as follows:
-For every ``module`` in ``dicewars.ai``, which contains a class ``AI``, the ``AI`` is identified by ``module``. Examples are fiven throughout the following sections.
+For every ``module`` in ``dicewars.ai``, which contains a class ``AI``, the ``AI`` is identified by ``module``. Examples are given throughout the following sections.
 
 ### Playing with human
 Starts a human-controlled client along those driven by AIs.
@@ -83,19 +83,19 @@ An AI is a class implementing two standard functions: ``__init__()`` and ``ai_tu
 Players and areas exist primary as instances of Player and Area.
 However -- originally for serialization purposes -- they are both referred to by their "name".
 These names are instances of `int`.
-Board can return Areas as given by name` every Area kwons its name.
+Board can return Areas as given by name` every Area knows its name.
 
 There is no reason for an AI to access instances of Player.
 
 ## AI interface
 
-The constructor is expected to takes following parameters:
+The constructor is expected to take following parameters:
 
     player_name     the name of the player this AI will control
     board           an instance of ``dicewars.client.game.Board``
     players_order   in what order do players take turns
 
-The turn making method is expected to takes following parameters:
+The turn making method is expected to take following parameters:
 
     board               an instance of ``dicewars.client.game.Board``   
     nb_moves_this_turn  number of attacks made in this turn
