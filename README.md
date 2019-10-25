@@ -4,8 +4,7 @@ Dice Wars is a strategy game where players take turns to attack adjacent territo
 their area. Each territory contains a number of dice determining player's presence
 and strength. The objective of the game is to conquer all territories and thus eliminate each opponent.
 
-This is a client-server implementation that was created as a part of a [bachelor's thesis at FIT BUT](https://www.vutbr.cz/www_base/zav_prace_soubor_verejne.php?file_id=180901)
-where it is described in more detail.
+This is a client-server implementation that based on a [bachelor's thesis at FIT BUT](https://www.vutbr.cz/www_base/zav_prace_soubor_verejne.php?file_id=180901).
 
 
 ## Installation
