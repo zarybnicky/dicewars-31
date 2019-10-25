@@ -26,7 +26,7 @@ class EndTurnCommand:
     pass
 
 
-class GenericAI(object):
+class AIDriver:
     """Basic AI agent implementation
     """
     def __init__(self, game, ai_constructor):

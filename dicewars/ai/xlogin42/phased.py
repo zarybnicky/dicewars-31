@@ -4,7 +4,7 @@ import random
 from ..utils import possible_attacks
 from .utils import best_sdc_attack, is_acceptable_sdc_attack
 
-from dicewars.ai.ai_base import BattleCommand, EndTurnCommand
+from dicewars.client.ai_driver import BattleCommand, EndTurnCommand
 
 
 class FinalAI:

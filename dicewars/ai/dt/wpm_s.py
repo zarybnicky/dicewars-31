@@ -4,7 +4,7 @@ import logging
 from ..utils import probability_of_successful_attack, sigmoid
 from ..utils import possible_attacks
 
-from dicewars.ai.ai_base import BattleCommand, EndTurnCommand
+from dicewars.client.ai_driver import BattleCommand, EndTurnCommand
 
 
 class AI:

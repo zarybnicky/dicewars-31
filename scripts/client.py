@@ -9,7 +9,7 @@ import importlib
 
 from dicewars.client.game import Game
 from dicewars.client.ui import ClientUI
-from dicewars.ai.ai_base import GenericAI
+from dicewars.client.ai_driver import AIDriver
 
 from utils import get_logging_level, get_nickname
 
@@ -45,7 +45,7 @@ def main():
     game = Game(args.address, args.port, hello_msg)
 
     if args.ai:
-        ai = GenericAI(game, get_ai_constructor(args.ai))
+        ai = AIDriver(game, get_ai_constructor(args.ai))
         ai.run()
     else:
         app = QApplication(sys.argv)
