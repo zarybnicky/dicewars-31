@@ -59,15 +59,17 @@ An example:
 ### Running a tournament
 Keeps picking a subset of AIs of specified size and has them play together.
 The total set of AIs considered is given in the script itself.
+Ownership (``-o``), dice assignment (``-s``), and dice rolls (``-f``) seeds are not exposed.
 Additionally exposes these options:
 
-    -n      number of board to be played
+    -n      number of boards to be played
     -g      size of games in number of players
     -l      folder where to put logs of last game
+    -s      seed for selecting who plays whom
     -r      keep reporting what game is being played
     --save  where to save the resulting list of games
 
-For every board, all permutations of player order are played, thus the total number of games equals ``N x G!``
+For every board, all rotations of a random permutation of the player order are played, thus the total number of games equals ``N x G``
 
 An example:
 
