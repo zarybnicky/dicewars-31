@@ -1,5 +1,6 @@
 import numpy
-from random import shuffle
+from dicewars.client.game.board import Board
+from typing import Iterator, Tuple
 
 
 def sigmoid(a):
@@ -9,13 +10,13 @@ def sigmoid(a):
     ----------
     a : numpy.int64
         Product of input vector and trained weights
-    
+
     Returns
     -------
     numpy.float64
         Result of the sigmoid from the interval [0, 1]
     """
-    return 1 / (1 + numpy.exp(-a)) 
+    return 1 / (1 + numpy.exp(-a))
 
 
 def probability_of_holding_area(board, area_name, area_dice, player_name):
@@ -40,7 +41,7 @@ def probability_of_holding_area(board, area_name, area_dice, player_name):
         adjacent_area = board.get_area(adj)
         if adjacent_area.get_owner_name() != player_name:
             enemy_dice = adjacent_area.get_dice()
-            if enemy_dice is 1:
+            if enemy_dice == 1:
                 continue
             lose_prob = attack_succcess_probability(enemy_dice, area_dice)
             hold_prob = 1.0 - lose_prob
@@ -157,7 +158,7 @@ def attack_succcess_probability(atk, df):
     }[atk][df]
 
 
-def possible_attacks(board, player_name):
+def possible_attacks(board: Board, player_name: int) -> Iterator[Tuple[int, int]]:
     for area in board.get_player_border(player_name):
         if not area.can_attack():
             continue

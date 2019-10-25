@@ -70,9 +70,15 @@ Additionally exposes these options:
 
 For every board, all permutations of player order are played, thus the total number of games equals ``N x G!``
 
+An example:
+
+    ./scripts/dicewars-tournament.py -r -g 2 -n 50 -b 101 -s 1337 -l ../logs
+
+
 ## Implementing AIs
 See ``dicewars/ai/template.py`` and other existing AIs in the package.
 An AI is a class implementing two standard functions: ``__init__()`` and ``ai_turn()``
+
 
 ### Name vs. instance
 Players and areas exist primary as instances of Player and Area.
@@ -97,5 +103,21 @@ The turn making method is expected to takes following parameters:
     nb_turns_this_game  number of turns ended so far
     previous_time_left  time (in seconds) left after last decision making
 
+The ``AI.ai_turn()`` is required to return an instance of ``BattleCommand`` or ``EndTurnCommand``.
 
-Multi-module implementation is possible, see ``xlogin42``
+Multi-module implementation is possible, see ``xlogin42`` for an example.
+
+## Learning about the world
+Board's ``get_player_areas()``, ``get_player_border()``, and ``get_players_regions()`` can be used to discover areas belonging to any player in the game.
+Instances of ``Area`` then allow inquiry through ``get_adjacent_areas()``, ``get_owner_name()`` and ``get_dice()``.
+
+It may also be practical to acquire all possible moves from ``dicewars.ai.utils.possible_attacks()``.
+This module also provides formulas for probability of conquering and holding an Area.
+
+The instance of ``Board`` passed to AI is a deepcopy, so the AI is free to mangle it in any way it deemed useful.
+
+## Dealing with misbehaving AIs
+
+* Slow AI -- AI taking longer than 1 sec to make a decision will be stopped in deciding and a ``EndTurnCommand`` will be sent instead. AIs are informed about their time consumption through ``previous_time_left``. 
+* Stupid AI -- AI attempting to make an illegal move will be terminated, contuming the game.
+* Passive AI -- AI sending only ``EndTurnCommand`` will be quickly taken care of by other players.
