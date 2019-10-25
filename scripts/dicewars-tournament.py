@@ -7,6 +7,7 @@ import itertools
 from utils import run_ai_only_game, get_nickname, BoardDefinition, SingleLineReporter, PlayerPerformance
 from utils import CombatantsProvider, column_t
 import random
+import sys
 import pickle
 
 
@@ -111,7 +112,8 @@ def main():
                     debug=args.debug,
                 )
                 all_games.append(game_summary)
-    except KeyboardInterrupt:
+    except (Exception, KeyboardInterrupt) as e:
+        sys.stderr.write("Breaking the tournament because of {}\n".format(repr(e)))
         for p in procs:
             p.kill()
 
