@@ -7,7 +7,7 @@ import random
 
 import importlib
 
-from dicewars.client.game import Game
+from dicewars.client.game.game import Game
 from dicewars.client.ui import ClientUI
 from dicewars.client.ai_driver import AIDriver
 
