@@ -176,7 +176,7 @@ class PlayerPerformance:
         return '{} {} % winrate [ {} / {} ] {}'.format('.', '.', '.', '.', ' '.join(str(ai) for ai in self.players))
 
 
-class CombatantsProvider:
+class TournamentCombatantsProvider:
     def __init__(self, players):
         self.game_numbers = np.zeros((len(players), len(players)), dtype=np.int)
         self.players = players

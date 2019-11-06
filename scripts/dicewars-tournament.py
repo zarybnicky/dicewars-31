@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 import math
 import itertools
 from utils import run_ai_only_game, get_nickname, BoardDefinition, SingleLineReporter, PlayerPerformance
-from utils import CombatantsProvider, column_t
+from utils import TournamentCombatantsProvider, column_t
 import random
 import sys
 import pickle
@@ -79,7 +79,7 @@ def rotational_permunations_generator(players):
 
 
 def main():
-    combatants_provider = CombatantsProvider(PLAYING_AIs)
+    combatants_provider = TournamentCombatantsProvider(PLAYING_AIs)
     args = parser.parse_args()
     random.seed(args.seed)
 
