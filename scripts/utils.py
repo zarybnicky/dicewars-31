@@ -214,10 +214,7 @@ class EvaluationCombatantsProvider:
         assert(self.put in self.players)
 
     def get_combatants(self, nb_combatants):
-        per_player_count = {ai: nb_games for ai, nb_games in zip(self.players, np.sum(self.game_numbers, axis=1))}
-
-        least_playing = sorted(per_player_count, key=lambda p: per_player_count[p])[0]
-        pivot_ind = self.players.index(least_playing)
+        pivot_ind = self.players.index(self.put)
 
         if self.game_numbers[pivot_ind][pivot_ind] == 0:
             rare_opponent_ind = (pivot_ind + 1) % len(self.players)
