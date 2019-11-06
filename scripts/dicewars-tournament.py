@@ -5,7 +5,8 @@ from argparse import ArgumentParser
 import math
 import itertools
 from utils import run_ai_only_game, get_nickname, BoardDefinition, SingleLineReporter, PlayerPerformance
-from utils import CombatantsProvider, column_t
+from utils import TournamentCombatantsProvider, EvaluationCombatantsProvider
+from utils import column_t
 import random
 import sys
 import pickle
@@ -19,6 +20,7 @@ parser.add_argument('-n', '--nb-boards', help="How many boards should be played"
 parser.add_argument('-g', '--game-size', help="How many players should play a game", type=int, required=True)
 parser.add_argument('-s', '--seed', help="Seed sampling players for a game", type=int)
 parser.add_argument('-l', '--logdir', help="Folder to store last running logs in.")
+parser.add_argument('--ai-under-test', help="Only play this AI against others")
 parser.add_argument('-d', '--debug', action='store_true')
 parser.add_argument('-r', '--report', help="State the game number on the stdout", action='store_true')
 parser.add_argument('--save', help="Where to put pickled GameSummaries")
@@ -79,8 +81,11 @@ def rotational_permunations_generator(players):
 
 
 def main():
-    combatants_provider = CombatantsProvider(PLAYING_AIs)
     args = parser.parse_args()
+    if args.ai_under_test is not None:
+        combatants_provider = EvaluationCombatantsProvider(PLAYING_AIs, args.ai_under_test)
+    else:
+        combatants_provider = TournamentCombatantsProvider(PLAYING_AIs)
     random.seed(args.seed)
 
     signal(SIGCHLD, signal_handler)

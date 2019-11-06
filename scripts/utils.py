@@ -176,7 +176,7 @@ class PlayerPerformance:
         return '{} {} % winrate [ {} / {} ] {}'.format('.', '.', '.', '.', ' '.join(str(ai) for ai in self.players))
 
 
-class CombatantsProvider:
+class TournamentCombatantsProvider:
     def __init__(self, players):
         self.game_numbers = np.zeros((len(players), len(players)), dtype=np.int)
         self.players = players
@@ -186,6 +186,35 @@ class CombatantsProvider:
 
         least_playing = sorted(per_player_count, key=lambda p: per_player_count[p])[0]
         pivot_ind = self.players.index(least_playing)
+
+        if self.game_numbers[pivot_ind][pivot_ind] == 0:
+            rare_opponent_ind = (pivot_ind + 1) % len(self.players)
+        else:
+            rare_opponent_ind = np.argmin(self.game_numbers[pivot_ind])
+        assert(rare_opponent_ind != pivot_ind)
+
+        possible_competitors = [self.players.index(ai) for ai in self.players if self.players.index(ai) not in [pivot_ind, rare_opponent_ind]]
+        random.shuffle(possible_competitors)
+        competitors = possible_competitors[:nb_combatants-2]
+
+        players = [pivot_ind, rare_opponent_ind] + competitors
+
+        for a_ind in players:
+            for b_ind in players:
+                self.game_numbers[a_ind][b_ind] += 1
+
+        return [self.players[p] for p in players]
+
+
+class EvaluationCombatantsProvider:
+    def __init__(self, players, ai_under_test):
+        self.game_numbers = np.zeros((len(players), len(players)), dtype=np.int)
+        self.players = players
+        self.put = ai_under_test
+        assert(self.put in self.players)
+
+    def get_combatants(self, nb_combatants):
+        pivot_ind = self.players.index(self.put)
 
         if self.game_numbers[pivot_ind][pivot_ind] == 0:
             rare_opponent_ind = (pivot_ind + 1) % len(self.players)

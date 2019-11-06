@@ -75,6 +75,10 @@ An example:
 
     ./scripts/dicewars-tournament.py -r -g 2 -n 50 -b 101 -s 1337 -l ../logs
 
+This script can also be used for evaluation of a specific AI, ensuring that it takes part in every game played.
+This is achieved through ``--ai-under-test``, e.g.:
+
+    ./scripts/dicewars-tournament.py -r -g 2 -n 50 --ai-under-test dt.sdc -b 101 -s 1337 -l ../logs
 
 ## Implementing AIs
 See ``dicewars/ai/template.py`` and other existing AIs in the package.
