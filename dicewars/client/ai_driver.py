@@ -187,7 +187,15 @@ class AIDriver:
             exit(1)
 
     def battle_is_valid(self, battle):
-        source_area = self.board.get_area(battle.source_name)
+        try:
+            source_area = self.board.get_area(battle.source_name)
+        except KeyError:
+            self.logger.error('Player {} specified area {} -- which is not even a valid area name!'.format(
+                self.player_name, battle.source_name
+            ))
+            self.ai_disabled = True
+            return False
+
         source_owner = source_area.get_owner_name()
 
         if source_owner != self.player_name:

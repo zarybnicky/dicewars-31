@@ -9,6 +9,8 @@ from .player import Player
 
 from .summary import GameSummary
 
+MAX_PASS_ROUNDS = 8
+
 
 class Game(object):
     """Instance of the game
@@ -38,6 +40,9 @@ class Game(object):
         self.address = addr
         self.port = port
         self.number_of_players = players
+
+        self.nb_players_alive = players
+        self.nb_consecutive_end_of_turns = 0
 
         self.create_socket()
 
@@ -110,6 +115,7 @@ class Game(object):
         msg = self.get_message(player)
 
         if msg['type'] == 'battle':
+            self.nb_consecutive_end_of_turns = 0
             battle = self.battle(self.board.get_area_by_name(msg['atk']), self.board.get_area_by_name(msg['def']))
             self.summary.add_battle()
             self.logger.debug("Battle result: {}".format(battle))
@@ -117,6 +123,7 @@ class Game(object):
                 self.send_message(self.players[p], 'battle', battle=battle)
 
         elif msg['type'] == 'end_turn':
+            self.nb_consecutive_end_of_turns += 1
             affected_areas = self.end_turn()
             for p in self.players:
                 self.send_message(self.players[p], 'end_turn', areas=affected_areas)
@@ -280,6 +287,7 @@ class Game(object):
         nickname = self.players[player].get_nickname()
         self.summary.add_elimination(nickname, self.summary.nb_battles)
         self.logger.info("Eliminated player {} ({})".format(player, nickname))
+        self.nb_players_alive -= 1
 
     def check_win_condition(self):
         """Check win conditions
@@ -289,16 +297,27 @@ class Game(object):
         bool
             True if a player has won, False otherwise
         """
+        if self.nb_consecutive_end_of_turns // self.nb_players_alive == MAX_PASS_ROUNDS:
+            for p in self.players.values():
+                if p.get_number_of_areas() > 0:
+                    self.eliminate_player(p.get_name())
+
+            self.process_win(None, -1)
+            return True
+
         for p in self.players:
             player = self.players[p]
             if player.get_number_of_areas() == self.board.get_number_of_areas():
-                self.summary.set_winner(player.get_nickname())
-                self.logger.info("Player {} ({}) wins!".format(player.get_nickname(), player.get_name()))
-                for i in self.players:
-                    self.send_message(self.players[i], 'game_end', winner=player.get_name())
+                self.process_win(player.get_nickname(), player.get_name())
                 return True
 
         return False
+
+    def process_win(self, player_nick, player_name):
+        self.summary.set_winner(player_nick)
+        self.logger.info("Player {} ({}) wins!".format(player_nick, player_name))
+        for i in self.players:
+            self.send_message(self.players[i], 'game_end', winner=player_name)
 
     ##############
     # NETWORKING #
