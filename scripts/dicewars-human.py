@@ -7,7 +7,6 @@ from utils import log_file_producer
 
 
 parser = ArgumentParser(prog='Dice_Wars')
-parser.add_argument('-n', '--number-of-players', help="Number of players.", type=int, default=2)
 parser.add_argument('-b', '--board', help="Seed for generating board", type=int)
 parser.add_argument('-s', '--strength', help="Seed for dice assignment", type=int)
 parser.add_argument('-o', '--ownership', help="Seed for province assignment", type=int)
@@ -35,8 +34,7 @@ def main():
     Run the Dice Wars game.
 
     Example:
-        ./dicewars.py -n 4 --ai 4 2 1
-        # runs a four-player game with AIs 4, 2, and 1
+        ./scripts/dicewars-human.py --ai dt.sdc dt.ste dt.stei dt.wpm_c
     """
     args = parser.parse_args()
 
