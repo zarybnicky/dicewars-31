@@ -40,8 +40,14 @@ For every ``module`` in ``dicewars.ai``, which contains a class ``AI``, the ``AI
 
 ### Playing with human
 Starts a human-controlled client along those driven by AIs.
+There can be between 1 and 7 AIs.
+For an easy game (beware, defeat is still a real possibility), try:
 
-    ./scripts/dicewars-human.py --ai dt.stei dt.rand xlogin42
+    ./scripts/dicewars-human.py --ai dt.sdc dt.rand xlogin00 xlogin42
+
+For a really challenging setup, try:
+
+    ./scripts/dicewars-human.py --ai dt.sdc dt.ste dt.stei dt.wpm_c
 
 ### Playing with fixed AI order
 Starts a set of games between AIs in given order.
