@@ -8,8 +8,10 @@ class GameSummary(object):
         self.eliminations = []
 
     def set_winner(self, winner):
-        assert(self.winner is None)
-        self.winner = winner
+        if winner is None:
+            self.winner = '#None'
+        else:
+            self.winner = winner
 
     def add_battle(self):
         self.nb_battles += 1
