@@ -46,6 +46,7 @@ class AIDriver:
         self.board = game.board
         self.player_name = game.player_name
         self.ai = ai_constructor(self.player_name, copy.deepcopy(self.board), copy.deepcopy(self.game.players_order))
+        self.ai_disabled = False
         self.waitingForResponse = False
         self.moves_this_turn = 0
         self.turns_finished = 0
@@ -67,6 +68,11 @@ class AIDriver:
                 exit(1)
             self.current_player_name = game.current_player.get_name()
             if self.current_player_name == self.player_name and not self.waitingForResponse:
+                if self.ai_disabled:
+                    self.logger.warning("The AI has already misbehaved, just end-turning.")
+                    self.send_message('end_turn')
+                    continue
+
                 try:
                     signal.setitimer(signal.ITIMER_REAL, TIME_LIMIT, 0)
                     command = self.ai.ai_turn(
@@ -138,8 +144,10 @@ class AIDriver:
 
     def process_command(self, command):
         if isinstance(command, BattleCommand):
-            self.check_battle_valid(command)
-            self.send_message('battle', command.source_name, command.target_name)
+            if self.battle_is_valid(command):
+                self.send_message('battle', command.source_name, command.target_name)
+            else:
+                self.send_message('end_turn')
         elif isinstance(command, EndTurnCommand):
             self.send_message('end_turn')
         else:
@@ -178,21 +186,29 @@ class AIDriver:
             self.logger.error("Connection to server broken.")
             exit(1)
 
-    def check_battle_valid(self, battle):
+    def battle_is_valid(self, battle):
         source_area = self.board.get_area(battle.source_name)
         source_owner = source_area.get_owner_name()
 
         if source_owner != self.player_name:
-            raise RuntimeError('Player {} attempted to attack from area {} owned by {}.'.format(
-                self.player, battle.source_name, source_owner
+            self.logger.error('Player {} attempted to attack from area {} owned by {}.'.format(
+                self.player_name, battle.source_name, source_owner
             ))
+            self.ai_disabled = True
+            return False
 
         if not source_area.can_attack():
-            raise RuntimeError('Attempted to attack from area {} having {} dice.'.format(
+            self.logger.error('Attempted to attack from area {} having {} dice.'.format(
                 battle.source_name, source_area.get_dice()
             ))
+            self.ai_disabled = True
+            return False
 
         if battle.target_name not in source_area.get_adjacent_areas():
-            raise RuntimeError('Attempted to attack from area {} area {} which is not adjacent.'.format(
+            self.logger.error('Attempted to attack from area {} area {} which is not adjacent.'.format(
                 battle.source_name, battle.target_name
             ))
+            self.ai_disabled = True
+            return False
+
+        return True
