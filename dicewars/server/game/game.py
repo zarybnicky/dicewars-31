@@ -298,6 +298,10 @@ class Game(object):
             True if a player has won, False otherwise
         """
         if self.nb_consecutive_end_of_turns // self.nb_players_alive == MAX_PASS_ROUNDS:
+            for p in self.players.values():
+                if p.get_number_of_areas() > 0:
+                    self.eliminate_player(p.get_name())
+
             self.process_win(None, -1)
             return True
 
