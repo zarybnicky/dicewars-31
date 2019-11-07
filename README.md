@@ -131,4 +131,4 @@ The instance of ``Board`` passed to AI is a deepcopy, so the AI is free to mangl
 
 * Slow AI -- AI taking longer than 1 sec to make a decision will be stopped in deciding and a ``EndTurnCommand`` will be sent instead. AIs are informed about their time consumption through ``previous_time_left``. 
 * Stupid AI -- AI attempting to make an illegal move will be switched off, idling for the rest of the game.
-* Passive AI -- AI sending only ``EndTurnCommand`` will be quickly taken care of by other players.
+* Passive AI -- AI sending only ``EndTurnCommand`` will be quickly taken care of by other players. However, if no AI makes a move for 8 consecutive rounds, the game will be contumated and every player scores a defeat.
