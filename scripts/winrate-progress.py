@@ -28,6 +28,10 @@ class PlayerRecord:
     def winrates(self):
         return [100.0*wins/games for games, wins in self.entries]
 
+    @property
+    def final_winrate(self):
+        return 100.0 * self.nb_wins / self.nb_games
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -53,12 +57,18 @@ def main():
             players[loser].score_game(nb_games_processed, False)
 
     plt.figure()
-    for name, record in players.items():
+    for name, record in sorted(players.items(), key=lambda n_r: n_r[1].final_winrate, reverse=True):
         mask = np.asarray(record.game_stamps) > args.xmin
-        plt.plot(np.asarray(record.game_stamps)[mask], np.asarray(record.winrates)[mask], label=name, drawstyle='steps-pre')
+        plt.plot(
+            np.asarray(record.game_stamps)[mask],
+            np.asarray(record.winrates)[mask],
+            label='{} ({:.1f} %)'.format(name, record.final_winrate),
+            drawstyle='steps-pre'
+        )
 
     plt.ylim(bottom=0)
     plt.xlim(left=args.xmin)
+
     plt.legend()
     plt.grid(axis='y', linestyle='--')
     plt.show()
