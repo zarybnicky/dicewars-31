@@ -89,7 +89,7 @@ This is achieved through ``--ai-under-test``, e.g.:
 ### Observing convergence of winrates
 If you have saved games from a tournament (through its ``--save`` option), you can display the evolution of the winrates:
 
-    ./scripts/winrate-progress.py --xmin 1000 ../tournaments/tournament-g2-n5000.pickle 
+    ./scripts/winrate-progress.py --xmin 10 ../tournaments/tournament-g2-n5000.pickle 
 
 Note that the evolution of winrates does not have any other interpretation than the rate of convergence!
 
