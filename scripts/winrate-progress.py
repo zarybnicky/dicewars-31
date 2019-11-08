@@ -52,7 +52,7 @@ def main():
 
     plt.figure()
     for name, record in players.items():
-        plt.plot(record.game_stamps, record.winrates, label=name)
+        plt.plot(record.game_stamps, record.winrates, label=name, drawstyle='steps-pre')
     plt.legend()
     plt.show()
 
