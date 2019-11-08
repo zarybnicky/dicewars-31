@@ -79,12 +79,20 @@ For every board, all rotations of a random permutation of the player order are p
 
 An example:
 
-    ./scripts/dicewars-tournament.py -r -g 2 -n 50 -b 101 -s 1337 -l ../logs
+    ./scripts/dicewars-tournament.py -r -g 2 -n 50 -b 101 -s 1337 -l ../logs --save ../tournaments/tournament-g2-n5000.pickle
 
 This script can also be used for evaluation of a specific AI, ensuring that it takes part in every game played.
 This is achieved through ``--ai-under-test``, e.g.:
 
     ./scripts/dicewars-tournament.py -r -g 2 -n 50 --ai-under-test dt.sdc -b 101 -s 1337 -l ../logs
+
+### Observing convergence of winrates
+If you have saved games from a tournament (through its ``--save`` option), you can display the evolution of the winrates:
+
+    ./scripts/winrate-progress.py --xmin 1000 ../tournaments/tournament-g2-n5000.pickle 
+
+Note that the evolution of winrates does not have any other interpretation than the rate of convergence!
+
 
 ## Implementing AIs
 See ``dicewars/ai/template.py`` and other existing AIs in the package.
