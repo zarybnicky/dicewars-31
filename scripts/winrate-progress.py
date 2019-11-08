@@ -2,6 +2,7 @@
 
 import argparse
 import matplotlib.pyplot as plt
+import numpy as np
 import pickle
 
 
@@ -30,6 +31,7 @@ class PlayerRecord:
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--xmin', type=int, default=0, help='how many game shall be skipped in the graph')
     parser.add_argument('games', help='where the games are stored')
     args = parser.parse_args()
 
@@ -52,7 +54,11 @@ def main():
 
     plt.figure()
     for name, record in players.items():
-        plt.plot(record.game_stamps, record.winrates, label=name, drawstyle='steps-pre')
+        mask = np.asarray(record.game_stamps) > args.xmin
+        plt.plot(np.asarray(record.game_stamps)[mask], np.asarray(record.winrates)[mask], label=name, drawstyle='steps-pre')
+
+    plt.ylim(bottom=0)
+    plt.xlim(left=args.xmin)
     plt.legend()
     plt.show()
 
