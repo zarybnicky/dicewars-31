@@ -60,6 +60,7 @@ def main():
     plt.ylim(bottom=0)
     plt.xlim(left=args.xmin)
     plt.legend()
+    plt.grid(axis='y', linestyle='--')
     plt.show()
 
 
