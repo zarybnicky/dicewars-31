@@ -1,3 +1,4 @@
 hexutil
 numpy
 pyqt5
+matplotlib
