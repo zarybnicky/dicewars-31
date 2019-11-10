@@ -20,8 +20,12 @@ class StaticGame(object):
         self.current_player_name = save_game['current_player_name']
         self.players_order = save_game['order']
 
-        self.players = {i: Player(i, -1) for i in self.players_order}
+        self.players = {i: Player(i, player_score(self.board, i)) for i in self.players_order}
 
         self.current_player = self.players[self.current_player_name]
 
         print("This is player name {}, the players order is {}".format(self.player_name, self.players_order))
+
+
+def player_score(board, player_name):
+    return max([len(r) for r in board.get_players_regions(player_name)])
