@@ -10,6 +10,7 @@ from .player import Player
 from .summary import GameSummary
 
 MAX_PASS_ROUNDS = 8
+MAX_BATTLES_PER_GAME = 10000  # obsevered maximum of 5671 over over 100k games
 
 
 class Game(object):
@@ -43,6 +44,7 @@ class Game(object):
 
         self.nb_players_alive = players
         self.nb_consecutive_end_of_turns = 0
+        self.nb_battles = 0
 
         self.create_socket()
 
@@ -167,6 +169,7 @@ class Game(object):
             about rolled numbers, dice left after the battle, and possible
             new ownership of the areas
         """
+        self.nb_battles += 1
         atk_dice = attacker.get_dice()
         def_dice = defender.get_dice()
         atk_pwr = def_pwr = 0
@@ -298,6 +301,16 @@ class Game(object):
             True if a player has won, False otherwise
         """
         if self.nb_consecutive_end_of_turns // self.nb_players_alive == MAX_PASS_ROUNDS:
+            self.logger.info("Game cancelled because the limit of {} rounds of passing has been reached".format(MAX_PASS_ROUNDS))
+            for p in self.players.values():
+                if p.get_number_of_areas() > 0:
+                    self.eliminate_player(p.get_name())
+
+            self.process_win(None, -1)
+            return True
+
+        if self.nb_battles == MAX_BATTLES_PER_GAME:
+            self.logger.info("Game cancelled because the limit of {} battles has been reached".format(MAX_BATTLES_PER_GAME))
             for p in self.players.values():
                 if p.get_number_of_areas() > 0:
                     self.eliminate_player(p.get_name())
