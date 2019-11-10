@@ -57,6 +57,9 @@ class MainWindow(QWidget):
         self.draw_areas()
         self.qp.end()
 
+    def set_area_text_fn(self, area_text_fn):
+        self.area_text_fn = area_text_fn
+
     def draw_areas(self):
         """Draw areas in the game board
         """

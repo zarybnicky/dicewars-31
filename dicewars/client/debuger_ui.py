@@ -1,10 +1,22 @@
 import logging
+import itertools
 
 from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton, QLabel
 from PyQt5.QtGui import QPainter, QColor, QPolygon, QPen, QBrush, QFont
 from PyQt5.QtCore import QPoint, Qt, QRectF, QTimer
 
 from .ui import Battle, MainWindow, Score, StatusArea
+
+
+area_descriptors = [
+    ('dice', lambda area: str(area.get_dice())),
+    ('name', lambda area: str(area.get_name())),
+]
+
+
+def descriptors_provider():
+    for i in itertools.count(0):
+        yield area_descriptors[i % len(area_descriptors)]
 
 
 class DebuggerUI(QWidget):
@@ -21,6 +33,9 @@ class DebuggerUI(QWidget):
         self.game = game
         self.window_name = 'Debugger - Player ' + str(self.game.player_name)
         self.init_ui()
+
+        self.area_text_fn_it = descriptors_provider()
+        self.handle_change_labels_button()
 
         self.socket_timer = QTimer()
         self.socket_timer.timeout.connect(self.check_socket)
@@ -39,28 +54,29 @@ class DebuggerUI(QWidget):
     def init_layout(self):
         grid = QGridLayout()
 
-        self.main_area = MainWindow(self.game)
+        self.main_area = MainWindow(self.game, lambda area: str(area.get_name()))
         self.battle_area = Battle(self.game)
         self.score_area = Score(self.game)
         self.status_area = StatusArea(self.game)
-        self.end_turn = QPushButton('End turn')
-        self.end_turn.clicked.connect(self.handle_end_turn_button)
 
-        if self.game.player_name == self.game.current_player.get_name():
-            self.end_turn.setEnabled(True)
-        else:
-            self.end_turn.setEnabled(False)
+        self.change_labels = QPushButton('Relabel')
+        self.change_labels.clicked.connect(self.handle_change_labels_button)
+        self.change_labels.setEnabled(True)
 
         grid.addWidget(self.main_area, 0, 0, 10, 8)
         grid.addWidget(self.battle_area, 0, 8, 4, 3)
         grid.addWidget(self.score_area, 4, 8, 4, 3)
-        grid.addWidget(self.end_turn, 8, 9, 1, 1)
+        grid.addWidget(self.change_labels, 8, 9, 1, 1)
         grid.addWidget(self.status_area, 9, 8, 1, 3)
 
         self.setLayout(grid)
 
-    def handle_end_turn_button(self):
-        self.game.send_message('end_turn')
+    def handle_change_labels_button(self):
+        name, fn = next(self.area_text_fn_it)
+        print('relabeling to {}'.format(name))
+        self.main_area.set_area_text_fn(fn)
+        self.main_area.update()
+        self.change_labels.setText(name)
 
     def check_socket(self):
         """Check server message queue for incoming messages
