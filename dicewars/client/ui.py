@@ -28,7 +28,7 @@ def player_color(player_name):
 class MainWindow(QWidget):
     """Main window of the GUI containing the game board
     """
-    def __init__(self, game):
+    def __init__(self, game, area_text_fn=lambda area: str(area.get_dice())):
         """
         Parameters
         ----------
@@ -50,6 +50,7 @@ class MainWindow(QWidget):
         self.pen.setWidth(2)
 
         self.activated_area_name = None
+        self.area_text_fn = area_text_fn
 
     def paintEvent(self, event):
         self.qp.begin(self)
@@ -93,7 +94,7 @@ class MainWindow(QWidget):
                     self.qp.setFont(self.font)
                     self.qp.setRenderHint(QPainter.TextAntialiasing)
 
-                    self.qp.drawText(rect, Qt.AlignCenter, str(area.get_dice()))
+                    self.qp.drawText(rect, Qt.AlignCenter, self.area_text_fn(area))
                     first_hex = False
                     self.qp.restore()
 
