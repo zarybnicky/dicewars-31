@@ -6,7 +6,7 @@ import sys
 import importlib
 
 from dicewars.client.game.static_game import StaticGame
-from dicewars.client.ui import ClientUI
+from dicewars.client.debuger_ui import DebuggerUI
 from dicewars.client.ai_driver import AIDriver
 
 from utils import get_logging_level, get_nickname
@@ -27,7 +27,7 @@ def main():
         game = StaticGame(f)
 
     app = QApplication(sys.argv)
-    ui = ClientUI(game)
+    ui = DebuggerUI(game)
     sys.exit(app.exec_())
 
 
