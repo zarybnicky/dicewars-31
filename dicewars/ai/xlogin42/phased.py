@@ -1,5 +1,6 @@
 import logging
 import random
+import pickle
 
 from ..utils import possible_attacks
 from .utils import best_sdc_attack, is_acceptable_sdc_attack
@@ -20,6 +21,7 @@ class FinalAI:
         game : Game
         """
         self.player_name = player_name
+        self.players_order = players_order
         self.logger = logging.getLogger('AI')
 
     def ai_turn(self, board, nb_moves_this_turn, nb_turns_this_game, previous_time_left):
@@ -33,6 +35,9 @@ class FinalAI:
             attack_filter = lambda x: x
             attack_selector = random.choice
             attack_acceptor = lambda x: True
+
+            with open('debug.save', 'wb') as f:
+                save(f, board, self.player_name, self.players_order)
         else:
             self.logger.debug("Doing a serious move")
             attack_filter = lambda x: self.from_largest_region(board, x)
@@ -65,3 +70,14 @@ class FinalAI:
         the_largest_region = max_sized_regions[0]
         self.logger.debug('The largest region: {}'.format(the_largest_region))
         return [attack for attack in attacks if attack[0].get_name() in the_largest_region]
+
+
+def save(f, board, player_name, players_order):
+    save_game = {
+        'player_name': player_name,
+        'board': board,
+        'current_player_name': player_name,
+        'order': players_order,
+    }
+
+    pickle.dump(save_game, f)
