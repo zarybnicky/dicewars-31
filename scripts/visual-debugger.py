@@ -3,8 +3,8 @@ import argparse
 from PyQt5.QtWidgets import QApplication
 import sys
 
-from dicewars.client.game.static_game import StaticGame
-from dicewars.client import debuger_ui
+from dicewars.client.game.debugger_game import StaticGame
+from dicewars.client import debugger_ui
 
 
 from dicewars.ai.xlogin42.utils import attacker_advantage
@@ -33,10 +33,10 @@ def main():
         game = StaticGame(f)
 
     area_describer = DetailedAreaReporter(game.board)
-    debuger_ui.on_area_activation = area_describer
+    debugger_ui.on_area_activation = area_describer
 
     app = QApplication(sys.argv)
-    ui = debuger_ui.DebuggerUI(game)
+    ui = debugger_ui.DebuggerUI(game)
     sys.exit(app.exec_())
 
 
