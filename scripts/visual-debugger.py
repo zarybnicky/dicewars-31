@@ -3,19 +3,25 @@ import argparse
 from PyQt5.QtWidgets import QApplication
 import sys
 
-import importlib
-
 from dicewars.client.game.static_game import StaticGame
-from dicewars.client.debuger_ui import DebuggerUI
-from dicewars.client.ai_driver import AIDriver
-
-from utils import get_logging_level, get_nickname
+from dicewars.client import debuger_ui
 
 
-def get_ai_constructor(ai_specification):
-    ai_module = importlib.import_module('dicewars.ai.{}'.format(ai_specification))
+from dicewars.ai.xlogin42.utils import attacker_advantage
 
-    return ai_module.AI
+
+class DetailedAreaReporter:
+    def __init__(self, board):
+        self.board = board
+
+    def __call__(self, area):
+        neighbours = [self.board.get_area(a) for a in area.get_adjacent_areas()]
+        enemy_neighbours = [a for a in neighbours if a.get_owner_name() != area.get_owner_name()]
+        return '{}: {} -- {}\n'.format(
+            area.get_name(),
+            [n.get_name() for n in neighbours],
+            [(n.get_name(), attacker_advantage(area, n)) for n in enemy_neighbours],
+        )
 
 
 def main():
@@ -26,8 +32,11 @@ def main():
     with open(args.savegame, 'rb') as f:
         game = StaticGame(f)
 
+    area_describer = DetailedAreaReporter(game.board)
+    debuger_ui.on_area_activation = area_describer
+
     app = QApplication(sys.argv)
-    ui = DebuggerUI(game)
+    ui = debuger_ui.DebuggerUI(game)
     sys.exit(app.exec_())
 
 

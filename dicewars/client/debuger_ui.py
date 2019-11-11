@@ -5,12 +5,18 @@ from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton
 
 from .ui import Battle, MainWindow, Score, StatusArea
 
+import sys
+
 
 area_descriptors = [
     ('Dice', lambda area: str(area.get_dice())),
     ('Name', lambda area: str(area.get_name())),
     ('Owner', lambda area: str(area.get_owner_name())),
 ]
+
+
+def on_area_activation(area_name):
+    return ''
 
 
 def descriptors_provider():
@@ -51,6 +57,8 @@ class DebuggerUI(QWidget):
         grid = QGridLayout()
 
         self.main_area = MainWindow(self.game, lambda area: str(area.get_name()))
+        self.main_area.mousePressEvent = mousePressEvent_monkeypatch.__get__(self.main_area)
+
         self.battle_area = Battle(self.game)
         self.score_area = Score(self.game)
         self.status_area = StatusArea(self.game)
@@ -72,3 +80,21 @@ class DebuggerUI(QWidget):
         self.main_area.set_area_text_fn(fn)
         self.main_area.update()
         self.change_labels.setText(name)
+
+
+def mousePressEvent_monkeypatch(self, event):
+    hexagon = self.get_hex(event.pos())
+    try:
+        area = self.board.get_area(self.areas_mapping[hexagon])
+
+        if self.activated_area_name:
+            if area.get_name() == self.activated_area_name:
+                self.activated_area_name = None
+                self.update()
+        else:
+            self.activated_area_name = area.get_name()
+            self.activated_area = area
+            self.update()
+            sys.stdout.write(on_area_activation(self.activated_area))
+    except KeyError:
+        pass
