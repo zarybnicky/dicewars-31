@@ -14,6 +14,7 @@ def TimeoutHandler(signum, handler):
 
 
 TIME_LIMIT = 1.0  # in seconds, for every decision
+TIME_LIMIT_CONSTRUCTOR = 10.0  # in seconds, for AI constructor
 
 
 class BattleCommand:
@@ -45,8 +46,22 @@ class AIDriver:
         self.game = game
         self.board = game.board
         self.player_name = game.player_name
-        self.ai = ai_constructor(self.player_name, copy.deepcopy(self.board), copy.deepcopy(self.game.players_order))
+        # TODO try block, for both errors and timeout
+
+        signal.signal(signal.SIGALRM, TimeoutHandler)
+
         self.ai_disabled = False
+        try:
+            signal.setitimer(signal.ITIMER_REAL, TIME_LIMIT_CONSTRUCTOR, 0)
+            self.ai = ai_constructor(self.player_name, copy.deepcopy(self.board), copy.deepcopy(self.game.players_order))
+            _, _ = signal.setitimer(signal.ITIMER_REAL, 0.0, 0)
+        except TimeoutError:
+            self.logger.error("The AI failed to construct itself in {}s. Disabling it.".format(TIME_LIMIT_CONSTRUCTOR))
+            self.ai_disabled = True
+        except Exception:
+            self.logger.error("The AI crashed during construction:\n", exc_info=True)
+            self.ai_disabled = True
+
         self.waitingForResponse = False
         self.moves_this_turn = 0
         self.turns_finished = 0
@@ -56,7 +71,6 @@ class AIDriver:
         """Main AI agent loop
         """
         game = self.game
-        signal.signal(signal.SIGALRM, TimeoutHandler)
 
         while True:
             message = game.input_queue.get(block=True, timeout=None)
@@ -87,6 +101,11 @@ class AIDriver:
                     self.logger.warning("Forced 'end_turn' because of timeout")
                     self.send_message('end_turn')
                     self.time_left_last_time = -1.0
+                except Exception:
+                    self.logger.error("The AI crashed during attempt to make a move:\n", exc_info=True)
+                    self.send_message('end_turn')
+                    self.ai_disabled = True
+
                 if not self.waitingForResponse:
                     self.logger.warning("Forced 'end_turn' because the implementation did nothing")
                     self.send_message('end_turn')
