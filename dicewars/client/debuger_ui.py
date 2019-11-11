@@ -7,8 +7,9 @@ from .ui import Battle, MainWindow, Score, StatusArea
 
 
 area_descriptors = [
-    ('dice', lambda area: str(area.get_dice())),
-    ('name', lambda area: str(area.get_name())),
+    ('Dice', lambda area: str(area.get_dice())),
+    ('Name', lambda area: str(area.get_name())),
+    ('Owner', lambda area: str(area.get_owner_name())),
 ]
 
 
