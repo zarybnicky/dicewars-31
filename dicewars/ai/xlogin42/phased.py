@@ -38,11 +38,15 @@ class FinalAI:
 
             with open('debug.save', 'wb') as f:
                 save(f, board, self.player_name, self.players_order)
+
         else:
             self.logger.debug("Doing a serious move")
             attack_filter = lambda x: self.from_largest_region(board, x)
             attack_selector = best_sdc_attack
             attack_acceptor = lambda x: is_acceptable_sdc_attack(x)
+
+            with open('debug.save', 'wb') as f:
+                save(f, board, self.player_name, self.players_order)
 
         all_moves = list(possible_attacks(board, self.player_name))
         if not all_moves:
