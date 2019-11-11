@@ -12,9 +12,6 @@ class StaticGame(object):
 
         save_game = pickle.load(f)
 
-        print(save_game['player_name'])
-        print(save_game['order'])
-
         self.player_name = save_game['player_name']
         self.board = save_game['board']
         self.current_player_name = save_game['current_player_name']

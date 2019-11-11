@@ -69,7 +69,6 @@ class DebuggerUI(QWidget):
 
     def handle_change_labels_button(self):
         name, fn = next(self.area_text_fn_it)
-        print('relabeling to {}'.format(name))
         self.main_area.set_area_text_fn(fn)
         self.main_area.update()
         self.change_labels.setText(name)
