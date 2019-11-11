@@ -58,6 +58,9 @@ class AIDriver:
         except TimeoutError:
             self.logger.error("The AI failed to construct itself in {}s. Disabling it.".format(TIME_LIMIT_CONSTRUCTOR))
             self.ai_disabled = True
+        except Exception:
+            self.logger.error("The AI crashed during construction:\n", exc_info=True)
+            self.ai_disabled = True
 
         self.waitingForResponse = False
         self.moves_this_turn = 0
