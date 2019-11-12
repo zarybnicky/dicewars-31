@@ -1,8 +1,7 @@
 import logging
 import random
-import pickle
 
-from ..utils import possible_attacks
+from ..utils import possible_attacks, save_state
 from .utils import best_sdc_attack, is_acceptable_sdc_attack
 
 from dicewars.client.ai_driver import BattleCommand, EndTurnCommand
@@ -37,7 +36,7 @@ class FinalAI:
             attack_acceptor = lambda x: True
 
             with open('debug.save', 'wb') as f:
-                save(f, board, self.player_name, self.players_order)
+                save_state(f, board, self.player_name, self.players_order)
 
         else:
             self.logger.debug("Doing a serious move")
@@ -46,7 +45,7 @@ class FinalAI:
             attack_acceptor = lambda x: is_acceptable_sdc_attack(x)
 
             with open('debug.save', 'wb') as f:
-                save(f, board, self.player_name, self.players_order)
+                save_state(f, board, self.player_name, self.players_order)
 
         all_moves = list(possible_attacks(board, self.player_name))
         if not all_moves:
@@ -74,14 +73,3 @@ class FinalAI:
         the_largest_region = max_sized_regions[0]
         self.logger.debug('The largest region: {}'.format(the_largest_region))
         return [attack for attack in attacks if attack[0].get_name() in the_largest_region]
-
-
-def save(f, board, player_name, players_order):
-    save_game = {
-        'player_name': player_name,
-        'board': board,
-        'current_player_name': player_name,
-        'order': players_order,
-    }
-
-    pickle.dump(save_game, f)

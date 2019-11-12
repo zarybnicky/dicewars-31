@@ -1,6 +1,7 @@
 import numpy
 from dicewars.client.game.board import Board
 from typing import Iterator, Tuple
+import pickle
 
 
 def sigmoid(a):
@@ -169,3 +170,14 @@ def possible_attacks(board: Board, player_name: int) -> Iterator[Tuple[int, int]
             adjacent_area = board.get_area(adj)
             if adjacent_area.get_owner_name() != player_name:
                 yield (area, adjacent_area)
+
+
+def save_state(f, board, player_name, players_order):
+    save_game = {
+        'player_name': player_name,
+        'board': board,
+        'current_player_name': player_name,
+        'order': players_order,
+    }
+
+    pickle.dump(save_game, f)
