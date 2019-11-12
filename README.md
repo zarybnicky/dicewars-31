@@ -93,7 +93,6 @@ If you have saved games from a tournament (through its ``--save`` option), you c
 
 Note that the evolution of winrates does not have any other interpretation than the rate of convergence!
 
-
 ## Implementing AIs
 See ``dicewars/ai/template.py`` and other existing AIs in the package.
 An AI is a class implementing two standard functions: ``__init__()`` and ``ai_turn()``
@@ -134,6 +133,16 @@ It may also be practical to acquire all possible moves from ``dicewars.ai.utils.
 This module also provides formulas for probability of conquering and holding an Area.
 
 The instance of ``Board`` passed to AI is a deepcopy, so the AI is free to mangle it in any way it deemed useful.
+
+### Debuging visually
+In addition to whatever favourite debugging method you have, Dicewars provide a simplistic way of visually inspecting the state of the game.
+There is `save_state()` function provided by `dicewars.ai.utils`, which creates a dump of the state which AI observes.
+
+The saved state can than be loaded by `scripts/visual-debugger.py`.
+This visual debugger allows displaying different information on areas (change label through the sole button in the interface) and a custom detailed information upon selection of an area of interest.
+
+There is an example of saving games in `dicewars.ai.xlogin42.phased.AI`, and the visual debugger displays a bit of information this AI cares about.
+It is expected that the developers of new AI will adjust the debugger's `DetailedAreaReporter` to the needs of their AI.
 
 ## Dealing with misbehaving AIs
 
