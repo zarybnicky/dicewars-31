@@ -15,8 +15,9 @@ def TimeoutHandler(signum, handler):
     raise TimeoutError('')
 
 
-TIME_LIMIT = 1.0  # in seconds, for every decision
 TIME_LIMIT_CONSTRUCTOR = 10.0  # in seconds, for AI constructor
+FISCHER_INIT = 10.0  # seconds
+FISCHER_INCREMENT = 0.1  # seconds
 
 
 class BattleCommand:
@@ -53,7 +54,7 @@ class AIDriver:
 
         self.ai_disabled = False
         try:
-            with FixedTimer(0.2):
+            with FixedTimer(TIME_LIMIT_CONSTRUCTOR):
                 self.ai = ai_constructor(self.player_name, copy.deepcopy(self.board), copy.deepcopy(self.game.players_order))
         except TimeoutError:
             self.logger.error("The AI failed to construct itself in {}s. Disabling it.".format(TIME_LIMIT_CONSTRUCTOR))
@@ -66,7 +67,7 @@ class AIDriver:
         self.moves_this_turn = 0
         self.turns_finished = 0
 
-        self.timer = FischerTimer(1.0, 0.01)
+        self.timer = FischerTimer(FISCHER_INIT, FISCHER_INCREMENT)
 
     def run(self):
         """Main AI agent loop
