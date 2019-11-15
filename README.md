@@ -14,10 +14,26 @@ To use this, you need to have python3 and the following python packages:
     hexutil
     numpy
     pyqt
+    matplotlib
 
 A standard ``requirements.txt`` is provided.
 
 Furthermore, the root of the repository needs to be in ``PYTHONPATH``.
+
+As an easy way of setting up the environment, do the following:
+
+    # install
+    mkdir SUI
+    cd SUI
+    git clone https://github.com/ibenes/dicewars.git repo
+    cd repo
+    bash install.sh
+
+    # setup
+    . path.sh
+    # try a game
+    ./scripts/dicewars-human.py --ai dt.sdc dt.rand xlogin00 xlogin42
+
 
 ## Running the game
 
