@@ -4,6 +4,8 @@ from json.decoder import JSONDecodeError
 import logging
 import signal
 
+from .timers import FischerTimer, FixedTimer
+
 
 class TimeoutError(Exception):
     pass
@@ -13,8 +15,9 @@ def TimeoutHandler(signum, handler):
     raise TimeoutError('')
 
 
-TIME_LIMIT = 1.0  # in seconds, for every decision
 TIME_LIMIT_CONSTRUCTOR = 10.0  # in seconds, for AI constructor
+FISCHER_INIT = 10.0  # seconds
+FISCHER_INCREMENT = 0.1  # seconds
 
 
 class BattleCommand:
@@ -46,15 +49,13 @@ class AIDriver:
         self.game = game
         self.board = game.board
         self.player_name = game.player_name
-        # TODO try block, for both errors and timeout
 
         signal.signal(signal.SIGALRM, TimeoutHandler)
 
         self.ai_disabled = False
         try:
-            signal.setitimer(signal.ITIMER_REAL, TIME_LIMIT_CONSTRUCTOR, 0)
-            self.ai = ai_constructor(self.player_name, copy.deepcopy(self.board), copy.deepcopy(self.game.players_order))
-            _, _ = signal.setitimer(signal.ITIMER_REAL, 0.0, 0)
+            with FixedTimer(TIME_LIMIT_CONSTRUCTOR):
+                self.ai = ai_constructor(self.player_name, copy.deepcopy(self.board), copy.deepcopy(self.game.players_order))
         except TimeoutError:
             self.logger.error("The AI failed to construct itself in {}s. Disabling it.".format(TIME_LIMIT_CONSTRUCTOR))
             self.ai_disabled = True
@@ -65,7 +66,8 @@ class AIDriver:
         self.waitingForResponse = False
         self.moves_this_turn = 0
         self.turns_finished = 0
-        self.time_left_last_time = TIME_LIMIT
+
+        self.timer = FischerTimer(FISCHER_INIT, FISCHER_INCREMENT)
 
     def run(self):
         """Main AI agent loop
@@ -88,14 +90,13 @@ class AIDriver:
                     continue
 
                 try:
-                    signal.setitimer(signal.ITIMER_REAL, TIME_LIMIT, 0)
-                    command = self.ai.ai_turn(
-                        copy.deepcopy(self.board),
-                        self.moves_this_turn,
-                        self.turns_finished,
-                        self.time_left_last_time,
-                    )
-                    self.time_left_last_time, _ = signal.setitimer(signal.ITIMER_REAL, 0.0, 0)
+                    with self.timer as time_left:
+                        command = self.ai.ai_turn(
+                            copy.deepcopy(self.board),
+                            self.moves_this_turn,
+                            self.turns_finished,
+                            time_left
+                        )
                     self.process_command(command)
                 except TimeoutError:
                     self.logger.warning("Forced 'end_turn' because of timeout")

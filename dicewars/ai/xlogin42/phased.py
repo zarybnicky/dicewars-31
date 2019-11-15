@@ -23,7 +23,7 @@ class FinalAI:
         self.players_order = players_order
         self.logger = logging.getLogger('AI')
 
-    def ai_turn(self, board, nb_moves_this_turn, nb_turns_this_game, previous_time_left):
+    def ai_turn(self, board, nb_moves_this_turn, nb_turns_this_game, time_left):
         """AI agent's turn
 
         Get a random area. If it has a possible move, the agent will do it.

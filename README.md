@@ -146,6 +146,9 @@ It is expected that the developers of new AI will adjust the debugger's `Detaile
 
 ## Dealing with misbehaving AIs
 
-* Slow AI -- AI taking longer than 1 sec to make a decision will be stopped in deciding and a ``EndTurnCommand`` will be sent instead. AIs are informed about their time consumption through ``previous_time_left``. 
+* Slow AI -- AIs have a fixed 10s time for constructing themselves.
+Additionally, a [Fischer clock](https://en.wikipedia.org/wiki/Time_control#Increment_and_delay_methods) of 10s and 0.1s increment limits time for decision making.
+AI failing to make a decision will be stopped in deciding and a ``EndTurnCommand`` will be sent instead (but the increment is made anyway, so the AI will be able to continue playing).
+AIs are informed about the time they have left through ``time_left``. 
 * Stupid AI -- AI attempting to make an illegal move will be switched off, idling for the rest of the game.
 * Passive AI -- AI sending only ``EndTurnCommand`` will be quickly taken care of by other players. However, if no AI makes a move for 8 consecutive rounds, the game will be contumated and every player scores a defeat.
