@@ -32,7 +32,7 @@ As an easy way of setting up the environment, do the following:
     # setup
     . path.sh
     # try a game
-    ./scripts/dicewars-human.py --ai dt.sdc dt.rand xlogin00 xlogin42
+    python3 ./scripts/dicewars-human.py --ai dt.sdc dt.rand xlogin00 xlogin42
 
 
 ## Running the game
@@ -46,11 +46,6 @@ However, they all expose a common set of parameters for controlling the pseudo-r
 
 When not set, the source of pseudo-random numbers is seeded from current time, becoming effectively random.
 
-Additionally, client-server communication can be controlled by:
-
-    -p    port, default 5005
-    -a    address, default is localhost
-
 Finally, individual AIs are refered to as follows:
 For every ``module`` in ``dicewars.ai``, which contains a class ``AI``, the ``AI`` is identified by ``module``. Examples are given throughout the following sections.
 
@@ -59,11 +54,11 @@ Starts a human-controlled client along those driven by AIs.
 There can be between 1 and 7 AIs.
 For an easy game (beware, defeat is still a real possibility), try:
 
-    ./scripts/dicewars-human.py --ai dt.sdc dt.rand xlogin00 xlogin42
+    python3 ./scripts/dicewars-human.py --ai dt.sdc dt.rand xlogin00 xlogin42
 
 For a really challenging setup, try:
 
-    ./scripts/dicewars-human.py --ai dt.sdc dt.ste dt.stei dt.wpm_c
+    python3 ./scripts/dicewars-human.py --ai dt.sdc dt.ste dt.stei dt.wpm_c
 
 ### Playing with fixed AI order
 Starts a set of games between AIs in given order.
@@ -76,7 +71,7 @@ Additionally exposes these options:
 
 An example:
 
-    ./scripts/dicewars-ai-only.py -r -b 11 -o 22 -s 33 -c 44 -n 10 -l ../logs --ai dt.stei xlogin42
+    python3 ./scripts/dicewars-ai-only.py -r -b 11 -o 22 -s 33 -c 44 -n 10 -l ../logs --ai dt.stei xlogin42
 
 ### Running a tournament
 Keeps picking a subset of AIs of specified size and has them play together.
@@ -95,17 +90,17 @@ For every board, all rotations of a random permutation of the player order are p
 
 An example:
 
-    ./scripts/dicewars-tournament.py -r -g 2 -n 50 -b 101 -s 1337 -l ../logs --save ../tournaments/tournament-g2-n5000.pickle
+    python3 ./scripts/dicewars-tournament.py -r -g 2 -n 50 -b 101 -s 1337 -l ../logs --save ../tournaments/tournament-g2-n5000.pickle
 
 This script can also be used for evaluation of a specific AI, ensuring that it takes part in every game played.
 This is achieved through ``--ai-under-test``, e.g.:
 
-    ./scripts/dicewars-tournament.py -r -g 2 -n 50 --ai-under-test dt.sdc -b 101 -s 1337 -l ../logs
+    python3 ./scripts/dicewars-tournament.py -r -g 2 -n 50 --ai-under-test dt.sdc -b 101 -s 1337 -l ../logs
 
 ### Observing convergence of winrates
 If you have saved games from a tournament (through its ``--save`` option), you can display the evolution of the winrates:
 
-    ./scripts/winrate-progress.py --xmin 10 ../tournaments/tournament-g2-n5000.pickle 
+    python3 ./scripts/winrate-progress.py --xmin 10 ../tournaments/tournament-g2-n5000.pickle 
 
 Note that the evolution of winrates does not have any other interpretation than the rate of convergence!
 
