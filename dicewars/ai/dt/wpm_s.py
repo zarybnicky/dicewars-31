@@ -50,7 +50,7 @@ class AI:
             8: numpy.array([0.277179, -0.16852433, -0.18678373, -0.17492631, -0.17996621, -0.1790844, -0.16977776, -0.18876063]),
         }[self.players]
 
-    def ai_turn(self, board, nb_moves_this_turn, nb_turns_this_game, previous_time_left):
+    def ai_turn(self, board, nb_moves_this_turn, nb_turns_this_game, time_left):
         """AI agent's turn
 
         This agent estimates probability to win the game from the feature vector associated

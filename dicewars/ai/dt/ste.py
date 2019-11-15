@@ -20,7 +20,7 @@ class AI:
         self.player_name = player_name
         self.logger = logging.getLogger('AI')
 
-    def ai_turn(self, board, nb_moves_this_turn, nb_turns_this_game, previous_time_left):
+    def ai_turn(self, board, nb_moves_this_turn, nb_turns_this_game, time_left):
         """AI agent's turn
 
         Agent gets a list preferred moves and makes such move that has the
