@@ -48,7 +48,7 @@ PLAYING_AIs = [
     'dt.wpm_s',
     'dt.wpm_c',
     'xlogin42',
-    'xlogin00',
+    'xzaryb00',
 ]
 UNIVERSAL_SEED = 42
 
@@ -118,6 +118,8 @@ def main():
                 )
                 all_games.append(game_summary)
     except (Exception, KeyboardInterrupt) as e:
+        import traceback
+        traceback.print_exc()
         sys.stderr.write("Breaking the tournament because of {}\n".format(repr(e)))
         for p in procs:
             p.kill()

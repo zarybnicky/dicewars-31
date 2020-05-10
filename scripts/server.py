@@ -7,6 +7,7 @@ import random
 from itertools import cycle
 
 from dicewars.server.game import Board, BoardGenerator
+# from dicewars.ai.xzaryb00.recording_server import RecordingGame as Game
 from dicewars.server.game import Game
 
 
